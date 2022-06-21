@@ -52,8 +52,6 @@ class Interests {
 				this.notify(run);
 			}
 		}
-
-		this.notify(runs[0])
 	}
 
 	async notify(run: Speedrun) {
