@@ -14,6 +14,9 @@
 	table input {
 		width: 1.25rem;
 		height: 1.25rem;
+		&:not(:checked) {
+			opacity: 0.3;
+		}
 	}
 	.ongoing td {
 		border-top: 2px solid var(--sx-blue-500);
