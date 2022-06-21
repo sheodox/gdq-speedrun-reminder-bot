@@ -49,10 +49,11 @@ class Schedule {
 			startTime = new Date($runCells.eq(0).text()),
 			gameName = $runCells.eq(1).text(),
 			runner = $runCells.eq(2).text(),
-			[details, platform] = $secondRowCells.eq(1).text().split('—').map(str => str.trim());
+			fullDetails = $secondRowCells.eq(1).text(),
+			[details, platform] = fullDetails.split('—').map(str => str.trim());
 
 		return {
-			id: `${gameName}|${details}`,
+			id: `${gameName}|${fullDetails}`,
 			startTime,
 			gameName,
 			platform,
