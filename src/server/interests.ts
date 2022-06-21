@@ -3,23 +3,31 @@ import path from 'path';
 import fetch from 'node-fetch';
 import { config } from './config.js';
 import { schedule, Speedrun } from './schedule.js'
-import { addMinutes, isWithinInterval, minutesToMilliseconds } from 'date-fns'
+import { addMinutes, endOfDay, isToday, isWithinInterval, minutesToMilliseconds, startOfDay } from 'date-fns'
 
 const SAVE_PATH = "./data/interests.json",
-	UPCOMING_CHECK_INTERVAL_MS = minutesToMilliseconds(1);
+	UPCOMING_CHECK_INTERVAL_MS = minutesToMilliseconds(1),
+	SOON_THRESHOLD_MINUTES = 15;
 
 await fs.mkdir(path.dirname(SAVE_PATH), { recursive: true })
+
+function today() {
+	return new Date().toLocaleDateString();
+}
 
 class Interests {
 	interestedSpeedruns = new Set<string>();
 	notifiedSpeedruns = new Set<string>();
+	lastNotifiedDay: string = '';
 
 	savePromise = Promise.resolve();
 
 	constructor() {
-		this.load();
-		schedule.ready.then(() => this.checkUpcoming())
-		setInterval(() => this.checkUpcoming(), UPCOMING_CHECK_INTERVAL_MS)
+		this.load().then(async () => {
+			await schedule.ready
+			this.checkUpcoming()
+			setInterval(() => this.checkUpcoming(), UPCOMING_CHECK_INTERVAL_MS)
+		});
 	}
 
 	add(id: string) {
@@ -31,6 +39,17 @@ class Interests {
 		this.save();
 	}
 
+	isEventOngoing() {
+		const runs = schedule.getSchedule(),
+			firstRun = runs[0],
+			lastRun = runs.at(-1);
+
+		return isWithinInterval(new Date(), {
+			start: startOfDay(firstRun.startTime),
+			end: endOfDay(lastRun.startTime)
+		})
+	}
+
 	getInterests() {
 		return Array.from(this.interestedSpeedruns);
 	}
@@ -40,18 +59,59 @@ class Interests {
 			date,
 			{
 				start: new Date(),
-				end: addMinutes(new Date(), 15)
+				end: addMinutes(new Date(), SOON_THRESHOLD_MINUTES)
 			}
 		)
 	}
 
 	async checkUpcoming() {
+		if (!this.isEventOngoing()) {
+			return;
+		}
+
 		const runs = schedule.getSchedule();
 		for (const run of runs) {
 			if (this.isSoon(run.startTime)) {
 				this.notify(run);
 			}
 		}
+
+		this.checkToday()
+	}
+
+	async checkToday() {
+		if (this.lastNotifiedDay === today()) {
+			return;
+		}
+		this.lastNotifiedDay = today();
+		this.save();
+
+		const runs = schedule.getSchedule(),
+			todayRuns = runs.filter(run => isToday(run.startTime)),
+			todayInterested = todayRuns.filter(run => this.interestedSpeedruns.has(run.id));
+
+		if (!todayInterested.length) {
+			this.sendDiscordMessage("There are no speedruns you are interested in today.");
+			return;
+		}
+
+		const games = todayInterested.map(run => {
+			return `**${run.gameName} - ${run.details}** at ${run.startTime.toLocaleTimeString()}`
+		})
+		const plural = todayInterested.length !== 1;
+		this.sendDiscordMessage(`There ${plural ? 'are' : 'is'} ${todayInterested.length} speedrun${plural ? 's' : ''} you are interested in today, ${new Date().toLocaleDateString()}.\n${games.join('\n')}`)
+	}
+
+	private async sendDiscordMessage(msg: string) {
+		await fetch(config.discordWebhook, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				content: msg
+			})
+		})
 	}
 
 	async notify(run: Speedrun) {
@@ -59,25 +119,19 @@ class Interests {
 			return;
 		}
 
-		await fetch(config.discordWebhook, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				content: `**${run.gameName} - ${run.details}** starts soon (${run.startTime.toLocaleString()})`
-			})
-		})
 		this.notifiedSpeedruns.add(run.id);
 		this.save();
+
+		await this.sendDiscordMessage(`**${run.gameName} - ${run.details}** starts soon! (${run.startTime.toLocaleString()})`)
 	}
 
 	async load() {
 		try {
 			const saved = JSON.parse((await fs.readFile(SAVE_PATH)).toString()),
-				{ interestedSpeedruns, notifiedSpeedruns } = saved;
+				{ interestedSpeedruns, notifiedSpeedruns, lastNotifiedDay } = saved;
 			this.interestedSpeedruns = new Set(interestedSpeedruns);
 			this.notifiedSpeedruns = new Set(notifiedSpeedruns);
+			this.lastNotifiedDay = lastNotifiedDay
 		}
 		catch (e) {
 			console.log("No previous interested speedruns found, starting fresh.")
@@ -87,7 +141,8 @@ class Interests {
 		this.savePromise = this.savePromise.then(async () => {
 			await fs.writeFile(SAVE_PATH, JSON.stringify({
 				interestedSpeedruns: Array.from(this.interestedSpeedruns),
-				notifiedSpeedruns: Array.from(this.notifiedSpeedruns)
+				notifiedSpeedruns: Array.from(this.notifiedSpeedruns),
+				lastNotifiedDay: this.lastNotifiedDay
 			}, null, 2));
 		})
 	}

@@ -1,4 +1,5 @@
 import { formatRelative, addDays, isBefore } from 'date-fns';
+import { createAutoExpireToast } from 'sheodox-ui';
 import { writable, get } from 'svelte/store';
 import { apiPath } from './common';
 
@@ -7,6 +8,7 @@ export interface Speedrun {
 	startTime: Date;
 	gameName: string;
 	details: string;
+	platform: string;
 	runner: string;
 	estimate: string;
 }
@@ -22,7 +24,7 @@ export const formatRelativeTime = (run: Speedrun) => {
 }
 
 export const setInterest = async (id: string, interested: boolean) => {
-	await fetch(apiPath('interest/' + encodeURIComponent(id)), {
+	const res = await fetch(apiPath('interest/' + encodeURIComponent(id)), {
 		method: "POST",
 		headers: {
 			'Content-Type': 'application/json',
@@ -30,7 +32,23 @@ export const setInterest = async (id: string, interested: boolean) => {
 		body: JSON.stringify({
 			interested
 		})
-	})
+	});
+
+	if (res.ok) {
+		interests.update(int => {
+			if (interested) {
+				return [...int, id];
+			}
+			return int.filter(i => i !== id);
+		})
+	} else {
+		createAutoExpireToast({
+			variant: 'error',
+			message: 'Error',
+			title: 'Error',
+			technicalDetails: `${res.status} - ${res.text()}`
+		})
+	}
 }
 
 async function init() {

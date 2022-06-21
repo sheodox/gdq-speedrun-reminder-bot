@@ -9,6 +9,7 @@ export interface Speedrun {
 	startTime: Date;
 	gameName: string;
 	details: string;
+	platform: string;
 	runner: string;
 	estimate: string;
 }
@@ -38,7 +39,7 @@ class Schedule {
 	}
 
 	getSchedule() {
-		return this.schedule.map(run => ({...run}));
+		return this.schedule.map(run => ({ ...run }));
 	}
 
 	parseRun($run: Cheerio<any>): Speedrun {
@@ -48,12 +49,13 @@ class Schedule {
 			startTime = new Date($runCells.eq(0).text()),
 			gameName = $runCells.eq(1).text(),
 			runner = $runCells.eq(2).text(),
-			details = $secondRowCells.eq(1).text();
+			[details, platform] = $secondRowCells.eq(1).text().split('—').map(str => str.trim());
 
 		return {
 			id: `${gameName}|${details}`,
 			startTime,
 			gameName,
+			platform,
 			details,
 			runner,
 			estimate: $secondRowCells.eq(0).text().trim()
