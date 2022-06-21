@@ -6,7 +6,7 @@ import { schedule, Speedrun } from './schedule.js'
 import { addMinutes, isWithinInterval, minutesToMilliseconds } from 'date-fns'
 
 const SAVE_PATH = "./data/interests.json",
-	UPCOMING_CHECK_INTERVAL_MS = minutesToMilliseconds(15);
+	UPCOMING_CHECK_INTERVAL_MS = minutesToMilliseconds(1);
 
 await fs.mkdir(path.dirname(SAVE_PATH), { recursive: true })
 
