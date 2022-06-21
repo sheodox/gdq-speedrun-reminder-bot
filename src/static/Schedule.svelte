@@ -14,6 +14,9 @@
 		top: 0;
 		z-index: 1;
 	}
+	table {
+		width: 100%;
+	}
 	table input {
 		width: 1.25rem;
 		height: 1.25rem;
