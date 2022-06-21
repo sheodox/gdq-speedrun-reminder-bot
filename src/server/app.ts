@@ -1,6 +1,8 @@
 // Require the framework and instantiate it
 import Fastify, { FastifySchema } from 'fastify';
 import cors from '@fastify/cors';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
 import { schedule } from './schedule.js';
 import { interests } from './interests.js';
 import { config } from './config.js'
@@ -44,6 +46,10 @@ fastify.post<{
 	if (runId) {
 		interested ? interests.add(runId) : interests.remove(runId);
 	}
+})
+
+fastify.register(fastifyStatic, {
+	root: path.join(process.cwd(), 'dist/static')
 })
 
 // Run the server!

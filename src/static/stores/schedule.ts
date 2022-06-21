@@ -44,9 +44,5 @@ async function init() {
 	}))
 
 	interests.set(intrsts)
-
-	console.log(
-		{ schedule: get(schedule) }
-	)
 }
 init()
