@@ -2,7 +2,7 @@
 	.hide {
 		display: none;
 	}
-	td {
+	td, th {
 		padding: var(--sx-spacing-2);
 	}
 	td {
