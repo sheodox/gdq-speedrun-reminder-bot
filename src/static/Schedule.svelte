@@ -9,7 +9,10 @@
 		border-bottom: 1px solid var(--sx-gray-300);
 	}
 	.day-split {
-		background: var(--sx-gray-transparent);
+		background: var(--sx-gray-500);
+		position: sticky;
+		top: 0;
+		z-index: 1;
 	}
 	table input {
 		width: 1.25rem;
@@ -29,6 +32,9 @@
 		&:last-child {
 			border-right: 2px solid var(--sx-blue-500);
 		}
+	}
+	.start-time {
+		white-space: nowrap;
 	}
 </style>
 
@@ -86,8 +92,8 @@
 				<td>
 					{run.runner}
 				</td>
-				<td>
-					{formatRelativeTime(run)}
+				<td class="start-time">
+					{formatRunStartTime(run)}
 				</td>
 			</tr>
 		{/each}
@@ -99,7 +105,7 @@
 
 <script lang="ts">
 	import { isAfter, isPast, isSameDay, isWithinInterval } from "date-fns";
-	import { schedule, interests, setInterest, Speedrun, formatRelativeTime } from "./stores/schedule";
+	import { schedule, interests, setInterest, Speedrun, formatRunStartTime } from "./stores/schedule";
 
 	const daySplitFormat = new Intl.DateTimeFormat("en", {
 		dateStyle: "full",
@@ -146,7 +152,7 @@
 		const run = $schedule[index],
 			prevRun = $schedule[index - 1];
 
-		return prevRun && !isSameDay(run.startTime, prevRun.startTime);
+		return !prevRun || !isSameDay(run.startTime, prevRun.startTime);
 	}
 
 	function isOngoing(index: number) {

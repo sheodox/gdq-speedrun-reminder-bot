@@ -16,7 +16,11 @@ export interface Speedrun {
 export const schedule = writable<Speedrun[]>([]);
 export const interests = writable<string[]>([]);
 
-export const formatRelativeTime = (run: Speedrun) => {
+const startTimeFormat = new Intl.DateTimeFormat('en', {
+	timeStyle: "short"
+})
+export const formatRunStartTime = (run: Speedrun) => {
+	return startTimeFormat.format(run.startTime);
 	if (isBefore(run.startTime, addDays(new Date, 6))) {
 		return formatRelative(run.startTime, new Date())
 	}
