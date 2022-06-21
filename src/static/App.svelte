@@ -4,6 +4,9 @@
 		max-width: 90%;
 		margin: 0 auto;
 	}
+	:global(:root) {
+		--sx-hue-gray: 180;
+	}
 </style>
 
 <Header appName="GDQ Speedrun Reminder Bot" />
