@@ -52,6 +52,8 @@
 	</label>
 </div>
 
+<Upcoming />
+
 <table class:show-past={showPast} class="mb-3">
 	<thead>
 		<tr>
@@ -71,7 +73,7 @@
 			{/if}
 			<tr
 				class:hide={(isInPast(index) && !showPast) || (!$interests.includes(run.id) && showOnlyInterested)}
-				class:ongoing={isOngoing(index)}
+				class:ongoing={isOngoing($schedule, index)}
 			>
 				<td>
 					<input
@@ -83,9 +85,7 @@
 				</td>
 				<td>
 					<span class="fw-bold sx-font-size-4">{run.gameName}</span>
-					{#if run.platform}
-						<span class="fw-bold sx-badge-{platformColor(run.platform)}">{run.platform}</span>
-					{/if}
+					<Platform platform={run.platform} />
 					<br />
 					{run.details}
 				</td>
@@ -107,8 +107,10 @@
 </span>
 
 <script lang="ts">
-	import { isAfter, isPast, isSameDay, isWithinInterval } from "date-fns";
-	import { schedule, interests, setInterest, Speedrun, formatRunStartTime } from "./stores/schedule";
+	import { isPast, isSameDay } from "date-fns";
+	import { isOngoing, schedule, interests, setInterest, Speedrun, formatRunStartTime } from "./stores/schedule";
+	import Upcoming from "./Upcoming.svelte";
+	import Platform from "./Platform.svelte";
 
 	const daySplitFormat = new Intl.DateTimeFormat("en", {
 		dateStyle: "full",
@@ -118,34 +120,6 @@
 		showOnlyInterested = false;
 
 	$: interestedCount = $interests.length;
-
-	const platformColors = new Map([
-		["pc", "orange"],
-		["pc - vr", "orange"],
-		["dos", "orange"],
-		["gcn", "purple"],
-		["gba", "yellow"],
-		["gbc", "yellow"],
-		["3ds", "yellow"],
-		["snes", "purple"],
-		["n64", "purple"],
-		["nes", "purple"],
-		["switch", "red"],
-		["saturn", "purple"],
-		["genesis", "purple"],
-	]);
-
-	function platformColor(platform: string) {
-		platform = platform.toLowerCase();
-		if (/^ps\d?$/.test(platform)) {
-			return "blue";
-		} else if (/xbox/.test(platform)) {
-			return "green";
-		} else if (/wii/.test(platform)) {
-			return "purple";
-		}
-		return platformColors.has(platform) ? platformColors.get(platform) : "red";
-	}
 
 	function toggleInterest(e: Event, run: Speedrun) {
 		setInterest(run.id, (e.target as HTMLInputElement).checked);
@@ -158,19 +132,6 @@
 		return !prevRun || !isSameDay(run.startTime, prevRun.startTime);
 	}
 
-	function isOngoing(index: number) {
-		const run = $schedule[index],
-			nextRun = $schedule[index + 1];
-
-		if (!nextRun) {
-			return isAfter(new Date(), run.startTime);
-		}
-
-		return isWithinInterval(new Date(), {
-			start: run.startTime,
-			end: nextRun.startTime,
-		});
-	}
 
 	function isInPast(index: number) {
 		if (index + 1 < $schedule.length) {

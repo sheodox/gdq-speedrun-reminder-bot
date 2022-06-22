@@ -1,6 +1,6 @@
-import { formatRelative, addDays, isBefore } from 'date-fns';
+import { isAfter, isWithinInterval } from 'date-fns';
 import { createAutoExpireToast } from 'sheodox-ui';
-import { writable, get } from 'svelte/store';
+import { writable } from 'svelte/store';
 import { apiPath } from './common';
 
 export interface Speedrun {
@@ -21,10 +21,6 @@ const startTimeFormat = new Intl.DateTimeFormat('en', {
 })
 export const formatRunStartTime = (run: Speedrun) => {
 	return startTimeFormat.format(run.startTime);
-	if (isBefore(run.startTime, addDays(new Date, 6))) {
-		return formatRelative(run.startTime, new Date())
-	}
-	return run.startTime.toLocaleString();
 }
 
 export const setInterest = async (id: string, interested: boolean) => {
@@ -53,6 +49,20 @@ export const setInterest = async (id: string, interested: boolean) => {
 			technicalDetails: `${res.status} - ${res.text()}`
 		})
 	}
+}
+
+export function isOngoing(runs: Speedrun[], index: number) {
+	const run = runs[index],
+		nextRun = runs[index + 1];
+
+	if (!nextRun) {
+		return isAfter(new Date(), run.startTime);
+	}
+
+	return isWithinInterval(new Date(), {
+		start: run.startTime,
+		end: nextRun.startTime,
+	});
 }
 
 async function init() {
