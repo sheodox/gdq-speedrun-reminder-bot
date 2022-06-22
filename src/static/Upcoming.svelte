@@ -15,7 +15,7 @@
 	}
 </style>
 
-<div class="f-row f-wrap gap-3 mb-3">
+<div class="f-row f-wrap gap-3 my-3">
 	{#each upcoming as { title, run, showCountdown }}
 		<div class="upcoming">
 			<div class="f-row gap-3 justify-content-between">

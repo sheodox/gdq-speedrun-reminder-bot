@@ -41,6 +41,8 @@
 	}
 </style>
 
+<Upcoming />
+
 <div class="p-3 f-row gap-3">
 	<label>
 		<input bind:checked={showPast} type="checkbox" />
@@ -51,8 +53,6 @@
 		Show Only Interested
 	</label>
 </div>
-
-<Upcoming />
 
 <table class:show-past={showPast} class="mb-3">
 	<thead>
