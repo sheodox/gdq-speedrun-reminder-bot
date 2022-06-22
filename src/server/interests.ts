@@ -1,9 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
-import fetch from 'node-fetch';
-import { config } from './config.js';
 import { schedule, Speedrun } from './schedule.js'
 import { addMinutes, endOfDay, isToday, isWithinInterval, minutesToMilliseconds, startOfDay } from 'date-fns'
+import { sendDiscordMessage } from './notify.js';
 
 const SAVE_PATH = "./data/interests.json",
 	UPCOMING_CHECK_INTERVAL_MS = minutesToMilliseconds(1),
@@ -91,7 +90,7 @@ class Interests {
 			todayInterested = todayRuns.filter(run => this.interestedSpeedruns.has(run.id));
 
 		if (!todayInterested.length) {
-			this.sendDiscordMessage("There are no speedruns you are interested in today.");
+			sendDiscordMessage("There are no speedruns you are interested in today.");
 			return;
 		}
 
@@ -99,19 +98,7 @@ class Interests {
 			return `**${run.gameName} - ${run.details}** at ${run.startTime.toLocaleTimeString()}`
 		})
 		const plural = todayInterested.length !== 1;
-		this.sendDiscordMessage(`There ${plural ? 'are' : 'is'} ${todayInterested.length} speedrun${plural ? 's' : ''} you are interested in today, ${new Date().toLocaleDateString()}.\n${games.join('\n')}`)
-	}
-
-	private async sendDiscordMessage(msg: string) {
-		await fetch(config.discordWebhook, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				content: msg
-			})
-		})
+		sendDiscordMessage(`There ${plural ? 'are' : 'is'} ${todayInterested.length} speedrun${plural ? 's' : ''} you are interested in today, ${new Date().toLocaleDateString()}.\n${games.join('\n')}`)
 	}
 
 	async notify(run: Speedrun) {
@@ -122,7 +109,7 @@ class Interests {
 		this.notifiedSpeedruns.add(run.id);
 		this.save();
 
-		await this.sendDiscordMessage(`**${run.gameName} - ${run.details}** starts soon! (${run.startTime.toLocaleString()})`)
+		await sendDiscordMessage(`**${run.gameName} - ${run.details}** starts soon! (${run.startTime.toLocaleString()})`)
 	}
 
 	async load() {
