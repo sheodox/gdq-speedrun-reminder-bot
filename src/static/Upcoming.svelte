@@ -3,6 +3,7 @@
 		background: var(--sx-gray-transparent);
 		padding: var(--sx-spacing-3);
 		border-radius: 5px;
+		line-height: 1.4;
 
 		.title {
 			text-transform: uppercase;
@@ -17,7 +18,7 @@
 
 <div class="f-row f-wrap gap-3 my-3">
 	{#each upcoming as { title, run, showCountdown }}
-		<div class="upcoming">
+		<button class="upcoming fw-normal text-align-left" on:click={() => scrollToRun(run)}>
 			<div class="f-row gap-3 justify-content-between">
 				<div class="title">{title}</div>
 				{#if showCountdown}
@@ -27,9 +28,8 @@
 			<div class="run">
 				<div class="game-name fw-bold sx-font-size-5">{run.gameName}</div>
 				<div>{run.estimate} - <Platform platform={run.platform} /></div>
-				<div>{run.runner}</div>
 			</div>
-		</div>
+		</button>
 	{/each}
 </div>
 
@@ -67,6 +67,24 @@
 			title: "Ongoing",
 			showCountdown: false,
 		};
+	}
+
+	async function scrollToRun(run: Speedrun) {
+		const index = $schedule.indexOf(run);
+
+		const runRow = document.getElementById("run-" + index);
+
+		if (runRow) {
+			runRow.scrollIntoView({
+				block: "center",
+				behavior: "smooth",
+				inline: "start",
+			});
+
+			runRow.classList.add('highlight');
+			await new Promise(resolve => setTimeout(resolve, 1500))
+			runRow.classList.remove('highlight');
+		}
 	}
 
 	function getNextRunSatisfyingCondition(runs: Speedrun[], conditionFn: (run: Speedrun) => boolean) {
