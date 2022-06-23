@@ -2,7 +2,12 @@
 	.hide {
 		display: none;
 	}
-	td, th {
+	tr {
+		transition: background 0.1s, outline 0.1s;
+		border-radius: 3px;
+	}
+	td,
+	th {
 		padding: var(--sx-spacing-2);
 	}
 	td {
@@ -24,34 +29,34 @@
 			opacity: 0.3;
 		}
 	}
-	.ongoing td {
-		border-top: 2px solid var(--sx-blue-500);
-		border-bottom: 2px solid var(--sx-blue-500);
-		background: var(--sx-blue-transparent);
-
-		&:first-child {
-			border-left: 2px solid var(--sx-blue-500);
-		}
-		&:last-child {
-			border-right: 2px solid var(--sx-blue-500);
-		}
+	.ongoing {
+		outline: 2px solid var(--sx-blue-500);
 	}
 	.start-time {
 		white-space: nowrap;
+	}
+	tr:global(.highlight) {
+		background: var(--sx-pink-transparent);
+		outline: 2px solid var(--sx-pink-500);
 	}
 </style>
 
 <Upcoming />
 
-<div class="p-3 f-row gap-3">
-	<label>
-		<input bind:checked={showPast} type="checkbox" />
-		Show Past Runs
-	</label>
-	<label>
-		<input bind:checked={showOnlyInterested} type="checkbox" />
-		Show Only Interested
-	</label>
+<div class="f-row p-3 justify-content-between">
+	<div class="f-row gap-3">
+		<label>
+			<input bind:checked={showPast} type="checkbox" />
+			Show Past Runs
+		</label>
+		<label>
+			<input bind:checked={showOnlyInterested} type="checkbox" />
+			Show Only Interested
+		</label>
+	</div>
+	<span>
+		Interested in {interestedCount} run{interestedCount === 1 ? "" : "s"}, {remainingRuns} left.
+	</span>
 </div>
 
 <table class:show-past={showPast} class="mb-3">
@@ -60,7 +65,7 @@
 			<th>Interested</th>
 			<th>Run</th>
 			<th>Estimate</th>
-			<th>Runner</th>
+			<th>Runners & <Icon icon="microphone" /> Host</th>
 			<th>Time</th>
 		</tr>
 	</thead>
@@ -72,6 +77,7 @@
 				</tr>
 			{/if}
 			<tr
+				id={`run-${index}`}
 				class:hide={(isInPast(index) && !showPast) || (!$interests.includes(run.id) && showOnlyInterested)}
 				class:ongoing={isOngoing($schedule, index)}
 			>
@@ -94,6 +100,8 @@
 				</td>
 				<td>
 					{run.runner}
+					<br />
+					<Icon icon="microphone" />{run.host}
 				</td>
 				<td class="start-time">
 					{formatRunStartTime(run)}
@@ -102,12 +110,10 @@
 		{/each}
 	</tbody>
 </table>
-<span>
-	Interested in {interestedCount} runs.
-</span>
 
 <script lang="ts">
-	import { isPast, isSameDay } from "date-fns";
+	import { Icon } from "sheodox-ui";
+	import { isPast, isSameDay, isFuture } from "date-fns";
 	import { isOngoing, schedule, interests, setInterest, Speedrun, formatRunStartTime } from "./stores/schedule";
 	import Upcoming from "./Upcoming.svelte";
 	import Platform from "./Platform.svelte";
@@ -120,6 +126,9 @@
 		showOnlyInterested = false;
 
 	$: interestedCount = $interests.length;
+	$: remainingRuns = $schedule.reduce((left, run) => {
+		return isFuture(run.startTime) && $interests.includes(run.id) ? left + 1 : left;
+	}, 0);
 
 	function toggleInterest(e: Event, run: Speedrun) {
 		setInterest(run.id, (e.target as HTMLInputElement).checked);
@@ -131,7 +140,6 @@
 
 		return !prevRun || !isSameDay(run.startTime, prevRun.startTime);
 	}
-
 
 	function isInPast(index: number) {
 		if (index + 1 < $schedule.length) {

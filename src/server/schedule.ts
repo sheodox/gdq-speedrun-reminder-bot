@@ -25,6 +25,7 @@ export interface Speedrun {
 	platform: string;
 	runner: string;
 	estimate: string;
+	host: string;
 }
 
 class Schedule {
@@ -107,7 +108,8 @@ class Schedule {
 			platform,
 			details,
 			runner,
-			estimate: $secondRowCells.eq(0).text().trim()
+			estimate: $secondRowCells.eq(0).text().trim(),
+			host: $secondRowCells.eq(2).text().trim(),
 		}
 	}
 }

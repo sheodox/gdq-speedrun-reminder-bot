@@ -10,6 +10,7 @@ export interface Speedrun {
 	details: string;
 	platform: string;
 	runner: string;
+	host: string;
 	estimate: string;
 }
 
