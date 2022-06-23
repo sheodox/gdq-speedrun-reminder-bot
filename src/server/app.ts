@@ -6,6 +6,7 @@ import path from 'path';
 import { schedule } from './schedule.js';
 import { interests } from './interests.js';
 import { config } from './config.js'
+import { sendDiscordMessage } from './notify.js';
 
 const fastify = Fastify({ logger: true }),
 	port = process.env.APP_PORT ? parseInt(process.env.APP_PORT, 10) : 5008;
@@ -56,6 +57,7 @@ fastify.register(fastifyStatic, {
 const start = async () => {
 	try {
 		await fastify.listen({ port, host: '0.0.0.0' })
+		sendDiscordMessage(("GDQ Speedrun Reminder Bot started!"))
 	} catch (err) {
 		fastify.log.error(err)
 		process.exit(1)
