@@ -27,7 +27,7 @@
 			</div>
 			<div class="run">
 				<div class="game-name fw-bold sx-font-size-5">{run.gameName}</div>
-				<div>{run.estimate} - <Platform platform={run.platform} /></div>
+				<div><Estimate estimate={run.estimate} /> <Platform platform={run.platform} /></div>
 			</div>
 		</button>
 	{/each}
@@ -37,6 +37,7 @@
 	import { interests, isOngoing, schedule, Speedrun } from "./stores/schedule";
 	import Platform from "./Platform.svelte";
 	import { formatDistanceToNow } from "date-fns";
+	import Estimate from "./Estimate.svelte";
 
 	type Upcoming = {
 		run: Speedrun;
@@ -81,9 +82,9 @@
 				inline: "start",
 			});
 
-			runRow.classList.add('highlight');
-			await new Promise(resolve => setTimeout(resolve, 1500))
-			runRow.classList.remove('highlight');
+			runRow.classList.add("highlight");
+			await new Promise((resolve) => setTimeout(resolve, 1500));
+			runRow.classList.remove("highlight");
 		}
 	}
 

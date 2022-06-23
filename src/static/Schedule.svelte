@@ -96,7 +96,7 @@
 					{run.details}
 				</td>
 				<td>
-					{run.estimate}
+					<Estimate estimate={run.estimate} />
 				</td>
 				<td>
 					{run.runner}
@@ -117,6 +117,7 @@
 	import { isOngoing, schedule, interests, setInterest, Speedrun, formatRunStartTime } from "./stores/schedule";
 	import Upcoming from "./Upcoming.svelte";
 	import Platform from "./Platform.svelte";
+	import Estimate from "./Estimate.svelte";
 
 	const daySplitFormat = new Intl.DateTimeFormat("en", {
 		dateStyle: "full",
