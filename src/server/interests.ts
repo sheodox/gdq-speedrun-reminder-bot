@@ -14,6 +14,13 @@ function today() {
 	return new Date().toLocaleDateString();
 }
 
+const startTimeFormat = new Intl.DateTimeFormat('en', {
+	timeStyle: "short"
+})
+const formatRunStartTime = (run: Speedrun) => {
+	return startTimeFormat.format(run.startTime);
+}
+
 class Interests {
 	interestedSpeedruns = new Set<string>();
 	notifiedSpeedruns = new Set<string>();
@@ -95,7 +102,7 @@ class Interests {
 		}
 
 		const games = todayInterested.map(run => {
-			return `**${run.gameName} - ${run.details}** at ${run.startTime.toLocaleTimeString()}`
+			return `**${run.gameName} - ${run.details}** at ${formatRunStartTime(run)}`
 		})
 		const plural = todayInterested.length !== 1;
 		sendDiscordMessage(`There ${plural ? 'are' : 'is'} ${todayInterested.length} speedrun${plural ? 's' : ''} you are interested in today, ${new Date().toLocaleDateString()}.\n${games.join('\n')}`)
