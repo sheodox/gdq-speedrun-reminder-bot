@@ -7,6 +7,10 @@
 	:global(:root) {
 		--sx-hue-gray: 180;
 	}
+	:global(header h1) {
+		font-size: var(--sx-font-size-6);
+		font-family: "Press Start 2P", sans-serif;
+	}
 </style>
 
 <Header appName="GDQ Speedrun Reminder Bot">

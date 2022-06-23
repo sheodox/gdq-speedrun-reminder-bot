@@ -38,6 +38,6 @@
     "fastify": "^4.0.3",
     "node-fetch": "^3.2.6",
     "sass": "^1.52.3",
-    "sheodox-ui": "^0.17.2"
+    "sheodox-ui": "^0.17.3"
   }
 }

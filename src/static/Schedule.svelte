@@ -18,19 +18,21 @@
 		position: sticky;
 		top: 0;
 		z-index: 1;
+		font-family: "Press Start 2P", sans-serif;
 	}
 	table {
 		width: 100%;
 	}
-	table input {
+	table :global(:is(input, .checkbox-icon)) {
 		width: 1.25rem;
 		height: 1.25rem;
-		&:not(:checked) {
-			opacity: 0.3;
-		}
+		font-size: 1.25rem;
+		line-height: 1;
+		padding: 0;
 	}
 	.ongoing {
 		outline: 2px solid var(--sx-blue-500);
+		background: var(--sx-blue-transparent);
 	}
 	.start-time {
 		white-space: nowrap;
@@ -45,14 +47,8 @@
 
 <div class="f-row p-3 justify-content-between">
 	<div class="f-row gap-3">
-		<label>
-			<input bind:checked={showPast} type="checkbox" />
-			Show Past Runs
-		</label>
-		<label>
-			<input bind:checked={showOnlyInterested} type="checkbox" />
-			Show Only Interested
-		</label>
+		<Checkbox id="show-past" bind:checked={showPast}>Show Past Runs</Checkbox>
+		<Checkbox id="show-only-interested" bind:checked={showOnlyInterested}>Show Only Interested</Checkbox>
 	</div>
 	<span>
 		Interested in {interestedCount} run{interestedCount === 1 ? "" : "s"}, {remainingRuns} left.
@@ -72,7 +68,7 @@
 	<tbody>
 		{#each $schedule as run, index}
 			{#if showDaySplit(index)}
-				<tr class="day-split sx-font-size-5 fw-bold text-align-center">
+				<tr class="day-split sx-font-size-4 fw-bold text-align-center">
 					<td colspan="10" class="py-4">{daySplitFormat.format(run.startTime)}</td>
 				</tr>
 			{/if}
@@ -82,12 +78,13 @@
 				class:ongoing={isOngoing($schedule, index)}
 			>
 				<td>
-					<input
-						aria-label="interested"
+					<Checkbox
+						id="interested-run-{index}"
 						checked={$interests.includes(run.id)}
-						type="checkbox"
 						on:change={(e) => toggleInterest(e, run)}
-					/>
+					>
+						<span class="sr-only">interested</span>
+					</Checkbox>
 				</td>
 				<td>
 					<span class="fw-bold sx-font-size-4">{run.gameName}</span>
@@ -112,7 +109,7 @@
 </table>
 
 <script lang="ts">
-	import { Icon } from "sheodox-ui";
+	import { Checkbox, Icon } from "sheodox-ui";
 	import { isPast, isSameDay, isFuture } from "date-fns";
 	import { isOngoing, schedule, interests, setInterest, Speedrun, formatRunStartTime } from "./stores/schedule";
 	import Upcoming from "./Upcoming.svelte";
