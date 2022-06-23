@@ -9,7 +9,11 @@
 	}
 </style>
 
-<Header appName="GDQ Speedrun Reminder Bot" />
+<Header appName="GDQ Speedrun Reminder Bot">
+	<span class="sx-font-size-9" slot="logo">
+		<Icon icon="gamepad" />
+	</span>
+</Header>
 <main>
 	<Schedule />
 </main>
@@ -17,6 +21,6 @@
 <Toasts />
 
 <script lang="ts">
-	import { Header, Toasts } from "sheodox-ui";
+	import { Header, Toasts, Icon } from "sheodox-ui";
 	import Schedule from "./Schedule.svelte";
 </script>
