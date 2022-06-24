@@ -18,9 +18,6 @@ const NOW_UPDATE_MS = 1000,
 	SCHEDULE_POLL_MS = minutesToMilliseconds(15);
 
 export const now = writable<Date>(new Date());
-let nowDate = new Date();
-now.subscribe(now => nowDate = now);
-
 export const schedule = writable<Speedrun[]>([]);
 export const interests = writable<string[]>([]);
 
