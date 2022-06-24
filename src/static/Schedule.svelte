@@ -41,6 +41,20 @@
 		background: var(--sx-pink-transparent);
 		outline: 2px solid var(--sx-pink-500);
 	}
+	.interested-column {
+		width: 45px;
+	}
+
+	@media (max-width: 600px) {
+		:is(td, th).desktop {
+			display: none;
+		}
+	}
+	@media (min-width: 600px) {
+		:is(td, th).mobile {
+			display: none;
+		}
+	}
 </style>
 
 <Upcoming />
@@ -58,10 +72,11 @@
 <table class:show-past={showPast} class="mb-3">
 	<thead>
 		<tr>
-			<th>Interested</th>
-			<th>Run</th>
-			<th>Estimate</th>
-			<th>Runners & <Icon icon="microphone" /> Host</th>
+			<th class="interested-column"><Icon icon="heart" /><span class="sr-only">Interested</span></th>
+			<th class="desktop">Run</th>
+			<th class="desktop">Estimate</th>
+			<th class="desktop">Runners & <Icon icon="microphone" /> Host</th>
+			<th class="mobile">Run</th>
 			<th>Time</th>
 		</tr>
 	</thead>
@@ -86,19 +101,37 @@
 						<span class="sr-only">interested</span>
 					</Checkbox>
 				</td>
-				<td>
+				<td class="desktop">
 					<span class="fw-bold sx-font-size-4">{run.gameName}</span>
 					<Platform platform={run.platform} />
 					<br />
 					{run.details}
 				</td>
-				<td>
+				<td class="desktop">
 					<Estimate estimate={run.estimate} />
 				</td>
-				<td>
+				<td class="desktop">
 					{run.runner}
 					<br />
 					<Icon icon="microphone" />{run.host}
+				</td>
+				<td class="mobile f-column gap-2">
+					<div>
+						<div class="mb-2">
+							<span class="fw-bold sx-font-size-4">{run.gameName}</span>
+							<br />
+							{run.details}
+						</div>
+						<div class="f-row gap-2">
+							<Platform platform={run.platform} />
+							<Estimate estimate={run.estimate} />
+						</div>
+					</div>
+					<div>
+						{run.runner}
+						<br />
+						<Icon icon="microphone" />{run.host}
+					</div>
 				</td>
 				<td class="start-time">
 					{formatRunStartTime(run)}

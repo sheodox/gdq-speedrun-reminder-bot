@@ -14,9 +14,18 @@
 			text-align: right;
 		}
 	}
+	.upcoming-container {
+		display: grid;
+		grid-template-columns: repeat(1, 1fr);
+	}
+	@media (min-width: 800px) {
+		.upcoming-container {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
 </style>
 
-<div class="f-row f-wrap gap-3 my-3">
+<div class="upcoming-container gap-3 my-3">
 	{#each upcoming as { title, run, showCountdown }}
 		<button class="upcoming fw-normal text-align-left" on:click={() => scrollToRun(run)}>
 			<div class="f-row gap-3 justify-content-between">
@@ -27,7 +36,7 @@
 			</div>
 			<div class="run">
 				<div class="game-name fw-bold sx-font-size-5">{run.gameName}</div>
-				<div><Estimate estimate={run.estimate} /> <Platform platform={run.platform} /></div>
+				<div class="f-row gap-1"><Estimate estimate={run.estimate} /> <Platform platform={run.platform} /></div>
 			</div>
 		</button>
 	{/each}

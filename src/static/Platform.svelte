@@ -1,5 +1,5 @@
 {#if platform}
-	<span class="fw-bold sx-badge-{platformColor(platform)}">{platform}</span>
+	<span class="m-0 fw-bold sx-badge-{platformColor(platform)}">{platform}</span>
 {/if}
 
 <script lang="ts">

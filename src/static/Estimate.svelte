@@ -4,7 +4,7 @@
 	}
 </style>
 
-<span>{estimate}</span>
+<span class="sx-badge-gray m-0">{estimate}</span>
 
 <script lang="ts">
 	export let estimate: string;
