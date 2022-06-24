@@ -51,7 +51,7 @@
 			display: none;
 		}
 	}
-	@media (min-width: 600px) {
+	@media (min-width: 601px) {
 		:is(td, th).mobile {
 			display: none;
 		}
