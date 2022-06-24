@@ -27,25 +27,30 @@
 
 <div class="upcoming-container gap-3 my-3">
 	{#each upcoming as { title, run, showCountdown }}
-		<button class="upcoming fw-normal text-align-left" on:click={() => scrollToRun(run)}>
-			<div class="f-row gap-3 justify-content-between">
-				<div class="title">{title}</div>
-				{#if showCountdown}
-					<div class="time">in {formatDistanceToNow(run.startTime)}</div>
-				{/if}
-			</div>
-			<div class="run">
-				<div class="game-name fw-bold sx-font-size-5">{run.gameName}</div>
-				<div class="f-row gap-1"><Estimate estimate={run.estimate} /> <Platform platform={run.platform} /></div>
-			</div>
-		</button>
+		{#if run}
+			<button class="upcoming fw-normal text-align-left" on:click={() => scrollToRun(run)}>
+				<div class="f-row gap-3 justify-content-between">
+					<div class="title">{title}</div>
+					{#if showCountdown}
+						<div class="time">in {formatDistance(run.startTime, $now)}</div>
+					{/if}
+				</div>
+				<div class="run">
+					<div class="game-name fw-bold sx-font-size-5">{run.gameName}</div>
+					<div class="f-row gap-1">
+						<Estimate estimate={run.estimate} />
+						<Platform platform={run.platform} />
+					</div>
+				</div>
+			</button>
+		{/if}
 	{/each}
 </div>
 
 <script lang="ts">
-	import { interests, isOngoing, schedule, Speedrun } from "./stores/schedule";
+	import { now, interests, ongoingRun, nextRun, nextInterestedRun, schedule, Speedrun } from "./stores/schedule";
 	import Platform from "./Platform.svelte";
-	import { formatDistanceToNow } from "date-fns";
+	import { formatDistance, formatDistanceToNow, formatRelative } from "date-fns";
 	import Estimate from "./Estimate.svelte";
 
 	type Upcoming = {
@@ -54,30 +59,24 @@
 		showCountdown: boolean;
 	};
 
-	let upcoming: Upcoming[] = [];
-	$: upcoming = [getOngoing($schedule), getUpcoming($schedule), getUpcomingInterested($schedule, $interests)].filter(
-		(run) => !!run
-	) as Upcoming[];
-
-	function findOngoingIndex(runs: Speedrun[]) {
-		return runs.findIndex((_, index) => {
-			return isOngoing(runs, index);
-		});
-	}
-
-	function getOngoing(runs: Speedrun[]) {
-		const ongoingIndex = findOngoingIndex(runs);
-
-		if (ongoingIndex === -1) {
-			return;
-		}
-
-		return {
-			run: runs[ongoingIndex],
+	let upcoming: Upcoming[];
+	$: upcoming = [
+		{
 			title: "Ongoing",
+			run: $ongoingRun,
 			showCountdown: false,
-		};
-	}
+		},
+		{
+			title: "Up Next",
+			run: $nextRun,
+			showCountdown: true,
+		},
+		{
+			title: "Next Interested Run",
+			run: $nextInterestedRun,
+			showCountdown: true,
+		},
+	];
 
 	async function scrollToRun(run: Speedrun) {
 		const index = $schedule.indexOf(run);
@@ -94,43 +93,6 @@
 			runRow.classList.add("highlight");
 			await new Promise((resolve) => setTimeout(resolve, 1500));
 			runRow.classList.remove("highlight");
-		}
-	}
-
-	function getNextRunSatisfyingCondition(runs: Speedrun[], conditionFn: (run: Speedrun) => boolean) {
-		const nextUpIndex = findOngoingIndex(runs) + 1;
-		for (let i = nextUpIndex; i < runs.length; i++) {
-			if (conditionFn(runs[i])) {
-				return runs[i];
-			}
-		}
-	}
-
-	function getUpcoming(runs: Speedrun[]) {
-		const run = getNextRunSatisfyingCondition(runs, (run) => {
-			return true;
-		});
-
-		if (run) {
-			return {
-				title: "Up Next",
-				run,
-				showCountdown: true,
-			};
-		}
-	}
-
-	function getUpcomingInterested(runs: Speedrun[], interests) {
-		const run = getNextRunSatisfyingCondition(runs, (run) => {
-			return interests.includes(run.id);
-		});
-
-		if (run) {
-			return {
-				title: "Next Interested Run",
-				run,
-				showCountdown: true,
-			};
 		}
 	}
 </script>

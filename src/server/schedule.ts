@@ -87,7 +87,7 @@ class Schedule {
 		}
 	}
 
-	getSchedule() {
+	getSchedule(): Speedrun[] {
 		return this.schedule.map(run => ({ ...run }));
 	}
 

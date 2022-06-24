@@ -30,6 +30,9 @@
 		line-height: 1;
 		padding: 0;
 	}
+	.is-past {
+		opacity: 0.6;
+	}
 	.ongoing {
 		outline: 2px solid var(--sx-blue-500);
 		background: var(--sx-blue-transparent);
@@ -73,7 +76,9 @@
 <table class:show-past={showPast} class="mb-3">
 	<thead>
 		<tr>
-			<th class="interested-column"><Icon icon="heart" variant="icon-only" /><span class="sr-only">Interested</span></th>
+			<th class="interested-column"
+				><Icon icon="heart" variant="icon-only" /><span class="sr-only">Interested</span></th
+			>
 			<th class="desktop">Run</th>
 			<th class="desktop">Estimate</th>
 			<th class="desktop">Runners & <Icon icon="microphone" /> Host</th>
@@ -83,15 +88,17 @@
 	</thead>
 	<tbody>
 		{#each $schedule as run, index}
-			{#if showDaySplit(index)}
+			{#if showDaySplit($schedule, index, $now, showPast)}
 				<tr class="day-split sx-font-size-4 fw-bold text-align-center">
 					<td colspan="10" class="py-4">{daySplitFormat.format(run.startTime)}</td>
 				</tr>
 			{/if}
 			<tr
 				id={`run-${index}`}
-				class:hide={(isInPast(index) && !showPast) || (!$interests.includes(run.id) && showOnlyInterested)}
-				class:ongoing={isOngoing($schedule, index)}
+				class:hide={(isInPast(index, $now) && !showPast) ||
+					(!$interests.includes(run.id) && showOnlyInterested)}
+				class:is-past={isInPast(index, $now)}
+				class:ongoing={$ongoingRun?.id === run.id}
 			>
 				<td>
 					<Checkbox
@@ -144,8 +151,8 @@
 
 <script lang="ts">
 	import { Checkbox, Icon } from "sheodox-ui";
-	import { isPast, isSameDay, isFuture } from "date-fns";
-	import { isOngoing, schedule, interests, setInterest, Speedrun, formatRunStartTime } from "./stores/schedule";
+	import { isSameDay, isBefore, endOfDay, isAfter } from "date-fns";
+	import { now, ongoingRun, schedule, interests, setInterest, Speedrun, formatRunStartTime } from "./stores/schedule";
 	import Upcoming from "./Upcoming.svelte";
 	import Platform from "./Platform.svelte";
 	import Estimate from "./Estimate.svelte";
@@ -159,24 +166,33 @@
 
 	$: interestedCount = $interests.length;
 	$: remainingRuns = $schedule.reduce((left, run) => {
-		return isFuture(run.startTime) && $interests.includes(run.id) ? left + 1 : left;
+		return isAfter(run.startTime, $now) && $interests.includes(run.id) ? left + 1 : left;
 	}, 0);
 
 	function toggleInterest(e: Event, run: Speedrun) {
 		setInterest(run.id, (e.target as HTMLInputElement).checked);
 	}
 
-	function showDaySplit(index: number) {
-		const run = $schedule[index],
-			prevRun = $schedule[index - 1];
+	function showDaySplit(schedule: Speedrun[], index: number, now: Date, showPast: boolean) {
+		const run = schedule[index],
+			prevRun = schedule[index - 1];
 
-		return !prevRun || !isSameDay(run.startTime, prevRun.startTime);
+		// don't show splits for days which we're not going to show any runs for,
+		// i.e. those for past days the past when hiding past runs
+		if (!showPast && isBefore(endOfDay(run.startTime), now)) {
+			return false;
+		}
+
+		return (
+			!prevRun || // show the banner for the first day
+			!isSameDay(run.startTime, prevRun.startTime) // show the banner before runs that are the first run on a day
+		);
 	}
 
-	function isInPast(index: number) {
+	function isInPast(index: number, now: Date) {
 		if (index + 1 < $schedule.length) {
 			// check if the next run has started
-			return isPast($schedule[index + 1].startTime);
+			return isBefore($schedule[index + 1].startTime, now);
 		}
 		return false;
 	}
