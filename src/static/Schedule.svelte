@@ -43,6 +43,7 @@
 	}
 	.interested-column {
 		width: 45px;
+		text-align: center;
 	}
 
 	@media (max-width: 600px) {
@@ -72,7 +73,7 @@
 <table class:show-past={showPast} class="mb-3">
 	<thead>
 		<tr>
-			<th class="interested-column"><Icon icon="heart" /><span class="sr-only">Interested</span></th>
+			<th class="interested-column"><Icon icon="heart" variant="icon-only" /><span class="sr-only">Interested</span></th>
 			<th class="desktop">Run</th>
 			<th class="desktop">Estimate</th>
 			<th class="desktop">Runners & <Icon icon="microphone" /> Host</th>
