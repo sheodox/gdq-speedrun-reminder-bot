@@ -1,4 +1,4 @@
-import { isAfter, isWithinInterval, minutesToMilliseconds } from 'date-fns';
+import { differenceInDays, intervalToDuration, isAfter, isBefore, isWithinInterval, minutesToMilliseconds } from 'date-fns';
 import { createAutoExpireToast } from 'sheodox-ui';
 import { writable, derived } from 'svelte/store';
 import { apiPath } from './common';
@@ -14,12 +14,42 @@ export interface Speedrun {
 	estimate: string;
 }
 
+export interface EventStatus {
+	isBefore: boolean;
+	isAfter: boolean;
+	countdown: string;
+}
+
 const NOW_UPDATE_MS = 1000,
 	SCHEDULE_POLL_MS = minutesToMilliseconds(15);
 
 export const now = writable<Date>(new Date());
 export const schedule = writable<Speedrun[]>([]);
 export const interests = writable<string[]>([]);
+const padTwo = (num: number) => ('' + num).padStart(2, '0');
+export const eventStatus = derived([now, schedule], ([now, schedule]): EventStatus => {
+	if (!schedule.length) {
+		return {
+			isBefore: false,
+			isAfter: false,
+			countdown: ''
+		}
+	}
+	const firstRun = schedule[0],
+		before = isBefore(now, firstRun.startTime),
+		interval = {
+			start: firstRun.startTime,
+			end: now
+		},
+		duration = intervalToDuration(interval),
+		days = differenceInDays(interval.start, interval.end);
+
+	return {
+		isBefore: before,
+		isAfter: false,
+		countdown: `${days > 0 ? days + ":" : ''}${padTwo(duration.hours)}:${padTwo(duration.minutes)}:${padTwo(duration.seconds)}`
+	}
+})
 
 //test on fast forward!
 //let num = 0;

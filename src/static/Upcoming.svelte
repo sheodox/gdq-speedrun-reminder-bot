@@ -4,19 +4,23 @@
 		padding: var(--sx-spacing-3);
 		border-radius: 5px;
 		line-height: 1.4;
+		margin: 0;
 
-		.title {
-			text-transform: uppercase;
-			color: var(--sx-gray-100);
-		}
 		.time {
 			color: var(--sx-gray-100);
 			text-align: right;
 		}
 	}
+	.title {
+		text-transform: uppercase;
+		color: var(--sx-gray-100);
+	}
 	.upcoming-container {
 		display: grid;
 		grid-template-columns: repeat(1, 1fr);
+	}
+	.countdown p {
+		font-family: monospace;
 	}
 	@media (min-width: 800px) {
 		.upcoming-container {
@@ -26,6 +30,15 @@
 </style>
 
 <div class="upcoming-container gap-3 my-3">
+	{#if $eventStatus.isBefore}
+		<div class="upcoming countdown f-column justify-content-between">
+			<div class="title">Event starts in</div>
+			<p class="m-0 sx-font-size-8">
+				{$eventStatus.countdown}
+			</p>
+			<div />
+		</div>
+	{/if}
 	{#each upcoming as { title, run, showCountdown }}
 		{#if run}
 			<button class="upcoming fw-normal text-align-left" on:click={() => scrollToRun(run)}>
@@ -48,9 +61,9 @@
 </div>
 
 <script lang="ts">
-	import { now, interests, ongoingRun, nextRun, nextInterestedRun, schedule, Speedrun } from "./stores/schedule";
+	import { eventStatus, now, ongoingRun, nextRun, nextInterestedRun, schedule, Speedrun } from "./stores/schedule";
 	import Platform from "./Platform.svelte";
-	import { formatDistance, formatDistanceToNow, formatRelative } from "date-fns";
+	import { formatDistance } from "date-fns";
 	import Estimate from "./Estimate.svelte";
 
 	type Upcoming = {
