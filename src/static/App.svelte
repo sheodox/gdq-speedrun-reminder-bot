@@ -18,13 +18,20 @@
 		<Icon icon="gamepad" />
 	</span>
 </Header>
-<main>
-	<Schedule />
+<main class="f-column f-1">
+	{#if !$eventStatus.initialized}
+		<div class="f-column justify-content-center align-items-enter f-1">
+			<Loading />
+		</div>
+	{:else}
+		<Schedule />
+	{/if}
 </main>
 
 <Toasts />
 
 <script lang="ts">
-	import { Header, Toasts, Icon } from "sheodox-ui";
+	import { Header, Toasts, Icon, Loading } from "sheodox-ui";
+	import { eventStatus } from "./stores/schedule";
 	import Schedule from "./Schedule.svelte";
 </script>

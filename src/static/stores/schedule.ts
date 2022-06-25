@@ -15,6 +15,7 @@ export interface Speedrun {
 }
 
 export interface EventStatus {
+	initialized: boolean;
 	isBefore: boolean;
 	isAfter: boolean;
 	countdown: string;
@@ -30,6 +31,7 @@ const padTwo = (num: number) => ('' + num).padStart(2, '0');
 export const eventStatus = derived([now, schedule], ([now, schedule]): EventStatus => {
 	if (!schedule.length) {
 		return {
+			initialized: false,
 			isBefore: false,
 			isAfter: false,
 			countdown: ''
@@ -45,6 +47,7 @@ export const eventStatus = derived([now, schedule], ([now, schedule]): EventStat
 		days = differenceInDays(interval.start, interval.end);
 
 	return {
+		initialized: true,
 		isBefore: before,
 		isAfter: false,
 		countdown: `${days > 0 ? days + ":" : ''}${padTwo(duration.hours)}:${padTwo(duration.minutes)}:${padTwo(duration.seconds)}`
