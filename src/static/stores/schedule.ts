@@ -1,4 +1,4 @@
-import { differenceInDays, intervalToDuration, isAfter, isBefore, isWithinInterval, minutesToMilliseconds } from 'date-fns';
+import { differenceInDays, endOfDay, intervalToDuration, isAfter, isBefore, isWithinInterval, minutesToMilliseconds } from 'date-fns';
 import { createAutoExpireToast } from 'sheodox-ui';
 import { writable, derived } from 'svelte/store';
 import { apiPath } from './common';
@@ -38,6 +38,7 @@ export const eventStatus = derived([now, schedule], ([now, schedule]): EventStat
 		}
 	}
 	const firstRun = schedule[0],
+		lastRun = schedule.at(-1),
 		before = isBefore(now, firstRun.startTime),
 		interval = {
 			start: firstRun.startTime,
@@ -49,7 +50,7 @@ export const eventStatus = derived([now, schedule], ([now, schedule]): EventStat
 	return {
 		initialized: true,
 		isBefore: before,
-		isAfter: false,
+		isAfter: isAfter(now, endOfDay(lastRun.startTime)),
 		countdown: `${days > 0 ? days + ":" : ''}${padTwo(duration.hours)}:${padTwo(duration.minutes)}:${padTwo(duration.seconds)}`
 	}
 })
@@ -71,12 +72,16 @@ export const formatRunStartTime = (run: Speedrun) => {
 	return startTimeFormat.format(run.startTime);
 }
 
-export const ongoingRunIndex = derived([schedule, now], ([schedule, now]) => {
+export const ongoingRunIndex = derived([schedule, now, eventStatus], ([schedule, now, eventStatus]) => {
+	if (eventStatus.isBefore) {
+		return -1;
+	}
+
 	return schedule.findIndex((run, index) => {
 		const nextRun = schedule[index + 1];
 
 		if (!nextRun) {
-			return isAfter(now, run.startTime);
+			return isBefore(now, endOfDay(run.startTime));
 		}
 
 		return isWithinInterval(now, {
@@ -86,13 +91,22 @@ export const ongoingRunIndex = derived([schedule, now], ([schedule, now]) => {
 	});
 })
 
-export const ongoingRun = derived([schedule, ongoingRunIndex], ([schedule, ongoingRunIndex]) => {
+export const ongoingRun = derived([schedule, ongoingRunIndex, eventStatus], ([schedule, ongoingRunIndex, eventStatus]) => {
+	if (eventStatus.isAfter) {
+		return;
+	}
 	return schedule[ongoingRunIndex];
 })
-export const nextRun = derived([schedule, ongoingRunIndex], ([schedule, ongoingRunIndex]) => {
+export const nextRun = derived([schedule, ongoingRunIndex, eventStatus], ([schedule, ongoingRunIndex, eventStatus]) => {
+	if (eventStatus.isAfter) {
+		return;
+	}
 	return schedule[ongoingRunIndex + 1]
 })
-export const nextInterestedRun = derived([schedule, ongoingRunIndex, interests], ([schedule, ongoingRunIndex, interests]) => {
+export const nextInterestedRun = derived([schedule, ongoingRunIndex, interests, eventStatus], ([schedule, ongoingRunIndex, interests, eventStatus]) => {
+	if (eventStatus.isAfter) {
+		return;
+	}
 	for (let i = ongoingRunIndex + 1; i < schedule.length; i++) {
 		if (interests.includes(schedule[i].id)) {
 			return schedule[i]

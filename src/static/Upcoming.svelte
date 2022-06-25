@@ -1,5 +1,6 @@
 <style lang="scss">
 	.upcoming {
+		justify-content: start;
 		background: var(--sx-gray-transparent);
 		padding: var(--sx-spacing-3);
 		border-radius: 5px;
@@ -22,6 +23,9 @@
 	.countdown p {
 		font-family: monospace;
 	}
+	.over-message {
+		font-family: "Press Start 2P", sans-serif;
+	}
 	@media (min-width: 800px) {
 		.upcoming-container {
 			grid-template-columns: repeat(3, 1fr);
@@ -29,6 +33,12 @@
 	}
 </style>
 
+{#if $eventStatus.isAfter}
+	<div class="over-message text-align-center">
+		<p class="sx-font-size-9">Time!</p>
+		<p class="sx-font-size-4">This event is over, come back in a few months.</p>
+	</div>
+{/if}
 <div class="upcoming-container gap-3 my-3">
 	{#if $eventStatus.isBefore}
 		<div class="upcoming countdown f-column justify-content-between">
