@@ -38,8 +38,8 @@
 				<div class="run">
 					<div class="game-name fw-bold sx-font-size-5">{run.gameName}</div>
 					<div class="f-row gap-1">
-						<Estimate estimate={run.estimate} />
 						<Platform platform={run.platform} />
+						<Estimate estimate={run.estimate} />
 					</div>
 				</div>
 			</button>
