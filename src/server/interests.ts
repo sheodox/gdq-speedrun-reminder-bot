@@ -82,6 +82,16 @@ class Interests {
 			}
 		}
 
+		// sometimes runs get removed or replaced, the schedule will notify of these changes, this
+		// just needs to get rid of interests that are no longer valid
+		for (const interest of this.interestedSpeedruns.values()) {
+			const stillOnSchedule = runs.some(run => run.id === interest);
+
+			if (!stillOnSchedule) {
+				this.remove(interest);
+			}
+		}
+
 		this.checkToday()
 	}
 

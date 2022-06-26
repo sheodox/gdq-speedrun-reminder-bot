@@ -5,18 +5,6 @@ import { minutesToMilliseconds } from 'date-fns';
 import fetch from 'node-fetch';
 import { sendDiscordMessage } from './notify.js';
 
-const REFRESH_INTERVAL_MS = minutesToMilliseconds(15),
-	SAVE_PATH = "./data/schedule.json",
-	NEW_RUN_TIME_FORMAT = new Intl.DateTimeFormat('en', {
-		dateStyle: 'medium',
-		timeStyle: 'short'
-	}),
-	WEEKDAY_FORMAT = new Intl.DateTimeFormat('en', {
-		weekday: 'short',
-	});
-
-await fs.mkdir(path.dirname(SAVE_PATH), { recursive: true })
-
 export interface Speedrun {
 	id: string;
 	startTime: Date;
@@ -27,6 +15,21 @@ export interface Speedrun {
 	estimate: string;
 	host: string;
 }
+const REFRESH_INTERVAL_MS = minutesToMilliseconds(15),
+	SAVE_PATH = "./data/schedule.json",
+	NEW_RUN_TIME_FORMAT = new Intl.DateTimeFormat('en', {
+		dateStyle: 'medium',
+		timeStyle: 'short'
+	}),
+	WEEKDAY_FORMAT = new Intl.DateTimeFormat('en', {
+		weekday: 'short',
+	}),
+	formatRunWithTime = (run: Speedrun) => {
+		return `**${run.gameName} - ${run.details}** at ${WEEKDAY_FORMAT.format(run.startTime)}, ${NEW_RUN_TIME_FORMAT.format(run.startTime)}`
+	};
+
+await fs.mkdir(path.dirname(SAVE_PATH), { recursive: true })
+
 
 class Schedule {
 	private schedule: Speedrun[]
@@ -42,7 +45,12 @@ class Schedule {
 		try {
 			const saved = JSON.parse((await fs.readFile(SAVE_PATH)).toString()),
 				{ schedule } = saved;
-			this.schedule = schedule;
+			this.schedule = schedule.map(run => {
+				return {
+					...run,
+					startTime: new Date(run.startTime)
+				}
+			});
 		}
 		catch (e) {
 			console.log("No previous schedule found, starting fresh.")
@@ -74,15 +82,24 @@ class Schedule {
 
 		if (oldSchedule) {
 			const newRuns = this.schedule.filter(run => {
-				return !oldSchedule.some(oldRun => oldRun.id === run.id);
-			});
+					return !oldSchedule.some(oldRun => oldRun.id === run.id);
+				}),
+				removedRuns = oldSchedule.filter(run => {
+					return this.schedule.every(oldRun => oldRun.id !== run.id);
+				});
+
 
 			if (newRuns.length) {
-				const games = newRuns.map(run => {
-					return `**${run.gameName} - ${run.details}** at ${WEEKDAY_FORMAT.format(run.startTime)}, ${NEW_RUN_TIME_FORMAT.format(run.startTime)}`
-				}).join('\n')
+				const games = newRuns.map(formatRunWithTime).join('\n')
 
 				sendDiscordMessage(`New run${newRuns.length === 1 ? '' : 's'} added to the schedule!\n${games}`)
+			}
+			if (removedRuns.length) {
+				const plural = removedRuns.length !== 1;
+
+				const games = removedRuns.map(formatRunWithTime).join('\n')
+
+				sendDiscordMessage(`Notice: ${plural ? `${removedRuns.length} runs were` : 'A run was'} removed from the schedule!\n${games}`)
 			}
 		}
 	}
