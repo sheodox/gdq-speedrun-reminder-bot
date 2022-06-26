@@ -5,6 +5,7 @@
 	tr {
 		transition: background 0.1s, outline 0.1s;
 		border-radius: 3px;
+		outline-offset: -2px;
 	}
 	td,
 	th {
