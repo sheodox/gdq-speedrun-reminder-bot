@@ -6,7 +6,7 @@ import { sendDiscordMessage } from './notify.js';
 
 const SAVE_PATH = "./data/interests.json",
 	UPCOMING_CHECK_INTERVAL_MS = minutesToMilliseconds(1),
-	SOON_THRESHOLD_MINUTES = 15;
+	SOON_THRESHOLD_MINUTES = 5;
 
 await fs.mkdir(path.dirname(SAVE_PATH), { recursive: true })
 
@@ -126,7 +126,7 @@ class Interests {
 		this.notifiedSpeedruns.add(run.id);
 		this.save();
 
-		await sendDiscordMessage(`**${run.gameName} - ${run.details}** starts soon! (${run.startTime.toLocaleString()})`)
+		await sendDiscordMessage(`**${run.gameName} - ${run.details}** starts soon! (${formatRunStartTime(run)})`)
 	}
 
 	async load() {
