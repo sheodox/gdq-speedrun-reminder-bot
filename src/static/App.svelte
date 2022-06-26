@@ -5,7 +5,7 @@
 		margin: 0 auto;
 	}
 	:global(:root) {
-		--sx-hue-gray: 180;
+		--sx-hue-gray: 255;
 	}
 	:global(header h1) {
 		font-size: var(--sx-font-size-5);
