@@ -15,7 +15,7 @@ export interface Speedrun {
 	estimate: string;
 	host: string;
 }
-const REFRESH_INTERVAL_MS = minutesToMilliseconds(15),
+const REFRESH_INTERVAL_MS = minutesToMilliseconds(5),
 	SAVE_PATH = "./data/schedule.json",
 	NEW_RUN_TIME_FORMAT = new Intl.DateTimeFormat('en', {
 		dateStyle: 'medium',

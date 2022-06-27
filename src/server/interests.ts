@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { schedule, Speedrun } from './schedule.js'
-import { addMinutes, endOfDay, isToday, isWithinInterval, minutesToMilliseconds, startOfDay } from 'date-fns'
+import { addMinutes, endOfDay, isPast, isToday, isWithinInterval, minutesToMilliseconds, startOfDay } from 'date-fns'
 import { sendDiscordMessage } from './notify.js';
 
 const SAVE_PATH = "./data/interests.json",
@@ -61,7 +61,7 @@ class Interests {
 	}
 
 	private isSoon(date: Date) {
-		return isWithinInterval(
+		return isPast(date) || isWithinInterval(
 			date,
 			{
 				start: new Date(),
