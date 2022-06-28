@@ -45,7 +45,7 @@ class Schedule {
 		try {
 			const saved = JSON.parse((await fs.readFile(SAVE_PATH)).toString()),
 				{ schedule } = saved;
-			this.schedule = schedule.map(run => {
+			this.schedule = schedule.map((run: Speedrun) => {
 				return {
 					...run,
 					startTime: new Date(run.startTime)

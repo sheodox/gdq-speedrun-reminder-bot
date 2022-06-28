@@ -6,8 +6,8 @@
 	export let platform: string;
 
 	const platformColors = new Map([
-		["pc", "orange"],
-		["pc - vr", "orange"],
+		["pc", "mint"],
+		["pc - vr", "mint"],
 		["dos", "orange"],
 		["gcn", "purple"],
 		["gba", "yellow"],
