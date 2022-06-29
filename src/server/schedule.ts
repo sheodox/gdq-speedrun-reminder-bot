@@ -113,9 +113,9 @@ class Schedule {
 			$runCells = $run.find('td'),
 			$secondRowCells = $secondLine.find('td'),
 			startTime = new Date($runCells.eq(0).text()),
-			gameName = $runCells.eq(1).text(),
-			runner = $runCells.eq(2).text(),
-			fullDetails = $secondRowCells.eq(1).text(),
+			gameName = $runCells.eq(1).text().trim(),
+			runner = $runCells.eq(2).text().trim(),
+			fullDetails = $secondRowCells.eq(1).text().trim(),
 			[details, platform] = fullDetails.split('—').map(str => str.trim());
 
 		return {
