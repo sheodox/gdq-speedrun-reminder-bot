@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { schedule, Speedrun } from './schedule.js'
-import { addMinutes, endOfDay, isPast, isToday, isWithinInterval, minutesToMilliseconds, startOfDay } from 'date-fns'
+import { addMinutes, endOfDay, isToday, isWithinInterval, minutesToMilliseconds, startOfDay } from 'date-fns'
 import { sendDiscordMessage } from './notify.js';
 
 const SAVE_PATH = "./data/interests.json",
@@ -61,11 +61,20 @@ class Interests {
 	}
 
 	private isSoon(date: Date) {
-		return isPast(date) || isWithinInterval(
+		return isWithinInterval(
 			date,
 			{
 				start: new Date(),
 				end: addMinutes(new Date(), SOON_THRESHOLD_MINUTES)
+			}
+		)
+	}
+	private isRecent(date: Date) {
+		return isWithinInterval(
+			date,
+			{
+				start: addMinutes(new Date(), -30),
+				end: new Date()
 			}
 		)
 	}
@@ -78,7 +87,10 @@ class Interests {
 		const runs = schedule.getSchedule();
 		for (const run of runs) {
 			if (this.isSoon(run.startTime)) {
-				this.notify(run);
+				this.notify(run, true);
+			}
+			else if (this.isRecent(run.startTime)) {
+				this.notify(run, false);
 			}
 		}
 
@@ -112,13 +124,13 @@ class Interests {
 		}
 
 		const games = todayInterested.map(run => {
-			return `**${run.gameName} - ${run.details}** at ${formatRunStartTime(run)}`
-		})
+			return `> **${run.gameName} - ${run.details}** at ${formatRunStartTime(run)}`
+		});
 		const plural = todayInterested.length !== 1;
 		sendDiscordMessage(`There ${plural ? 'are' : 'is'} ${todayInterested.length} speedrun${plural ? 's' : ''} you are interested in today, ${new Date().toLocaleDateString()}.\n${games.join('\n')}`)
 	}
 
-	async notify(run: Speedrun) {
+	async notify(run: Speedrun, isFuture: boolean) {
 		if (this.notifiedSpeedruns.has(run.id) || !this.interestedSpeedruns.has(run.id)) {
 			return;
 		}
@@ -126,7 +138,8 @@ class Interests {
 		this.notifiedSpeedruns.add(run.id);
 		this.save();
 
-		await sendDiscordMessage(`**${run.gameName} - ${run.details}** starts soon! (${formatRunStartTime(run)})`)
+		const msg = isFuture ? 'starts soon' : 'recently started';
+		await sendDiscordMessage(`**${run.gameName} - ${run.details}** ${msg}! (${formatRunStartTime(run)})`)
 	}
 
 	async load() {
