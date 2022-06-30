@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs/promises';
-import { Cheerio, load } from 'cheerio';
+import { Cheerio, CheerioAPI, load } from 'cheerio';
 import { minutesToMilliseconds } from 'date-fns';
 import fetch from 'node-fetch';
 import { sendDiscordMessage } from './notify.js';
@@ -76,14 +76,14 @@ class Schedule {
 			});
 
 		for (const $run of $runs) {
-			this.schedule.push(this.parseRun($run));
+			this.schedule.push(this.parseRun($run, $));
 		}
 		this.save();
 
 		if (oldSchedule) {
 			const newRuns = this.schedule.filter(run => {
-					return !oldSchedule.some(oldRun => oldRun.id === run.id);
-				}),
+				return !oldSchedule.some(oldRun => oldRun.id === run.id);
+			}),
 				removedRuns = oldSchedule.filter(run => {
 					return this.schedule.every(oldRun => oldRun.id !== run.id);
 				});
@@ -108,15 +108,18 @@ class Schedule {
 		return this.schedule.map(run => ({ ...run }));
 	}
 
-	parseRun($run: Cheerio<any>): Speedrun {
+	parseRun($run: Cheerio<any>, $: CheerioAPI): Speedrun {
+		function getElementText() {
+			return $(this).text().trim()
+		}
+
 		const $secondLine = $run.next('tr.second-row'),
 			$runCells = $run.find('td'),
 			$secondRowCells = $secondLine.find('td'),
-			startTime = new Date($runCells.eq(0).text()),
-			gameName = $runCells.eq(1).text().trim(),
-			runner = $runCells.eq(2).text().trim(),
-			fullDetails = $secondRowCells.eq(1).text().trim(),
-			[details, platform] = fullDetails.split('—').map(str => str.trim());
+			[startTimeStr, gameName, runner] = $runCells.map(getElementText).toArray(),
+			[estimate, fullDetails, host] = $secondRowCells.map(getElementText).toArray(),
+			[details, platform] = fullDetails.split('—').map((str: string) => str.trim()),
+			startTime = new Date(startTimeStr);
 
 		return {
 			id: `${gameName}|${fullDetails}`,
@@ -125,8 +128,8 @@ class Schedule {
 			platform,
 			details,
 			runner,
-			estimate: $secondRowCells.eq(0).text().trim(),
-			host: $secondRowCells.eq(2).text().trim(),
+			estimate,
+			host,
 		}
 	}
 }
