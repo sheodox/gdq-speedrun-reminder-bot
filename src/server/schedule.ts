@@ -25,7 +25,7 @@ const REFRESH_INTERVAL_MS = minutesToMilliseconds(5),
 		weekday: 'short',
 	}),
 	formatRunWithTime = (run: Speedrun) => {
-		return `**${run.gameName} - ${run.details}** at ${WEEKDAY_FORMAT.format(run.startTime)}, ${NEW_RUN_TIME_FORMAT.format(run.startTime)}`
+		return `> **${run.gameName} - ${run.details}** at ${WEEKDAY_FORMAT.format(run.startTime)}, ${NEW_RUN_TIME_FORMAT.format(run.startTime)}`
 	};
 
 await fs.mkdir(path.dirname(SAVE_PATH), { recursive: true })
