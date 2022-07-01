@@ -19,7 +19,7 @@
 		position: sticky;
 		top: 0;
 		z-index: 1;
-		font-family: "Press Start 2P", sans-serif;
+		font-family: 'Press Start 2P', sans-serif;
 	}
 	table {
 		width: 100%;
@@ -70,15 +70,14 @@
 		<Checkbox id="show-only-interested" bind:checked={showOnlyInterested}>Show Only Interested</Checkbox>
 	</div>
 	<span>
-		Interested in {interestedCount} run{interestedCount === 1 ? "" : "s"}, {remainingRuns} left.
+		Interested in {interestedCount} run{interestedCount === 1 ? '' : 's'}, {remainingRuns} left.
 	</span>
 </div>
 
 <table class:show-past={showPast} class="mb-3">
 	<thead>
 		<tr>
-			<th class="interested-column"
-				><Icon icon="heart" variant="icon-only" /><span class="sr-only">Interested</span></th
+			<th class="interested-column"><Icon icon="heart" variant="icon-only" /><span class="sr-only">Interested</span></th
 			>
 			<th class="desktop">Run</th>
 			<th class="desktop">Estimate</th>
@@ -96,8 +95,7 @@
 			{/if}
 			<tr
 				id={`run-${index}`}
-				class:hide={(isInPast(index, $now) && !showPast) ||
-					(!$interests.includes(run.id) && showOnlyInterested)}
+				class:hide={(isInPast(index, $now) && !showPast) || (!$interests.includes(run.id) && showOnlyInterested)}
 				class:is-past={isInPast(index, $now)}
 				class:ongoing={$ongoingRun?.id === run.id}
 			>
@@ -151,15 +149,15 @@
 </table>
 
 <script lang="ts">
-	import { Checkbox, Icon } from "sheodox-ui";
-	import { isSameDay, isBefore, endOfDay, isAfter } from "date-fns";
-	import { now, ongoingRun, schedule, interests, setInterest, Speedrun, formatRunStartTime } from "./stores/schedule";
-	import Upcoming from "./Upcoming.svelte";
-	import Platform from "./Platform.svelte";
-	import Estimate from "./Estimate.svelte";
+	import { Checkbox, Icon } from 'sheodox-ui';
+	import { isSameDay, isBefore, endOfDay, isAfter } from 'date-fns';
+	import { now, ongoingRun, schedule, interests, setInterest, Speedrun, formatRunStartTime } from './stores/schedule';
+	import Upcoming from './Upcoming.svelte';
+	import Platform from './Platform.svelte';
+	import Estimate from './Estimate.svelte';
 
-	const daySplitFormat = new Intl.DateTimeFormat("en", {
-		dateStyle: "full",
+	const daySplitFormat = new Intl.DateTimeFormat('en', {
+		dateStyle: 'full',
 	});
 
 	let showPast = false,

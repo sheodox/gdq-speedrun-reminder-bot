@@ -9,7 +9,7 @@
 	}
 	:global(header h1) {
 		font-size: var(--sx-font-size-5);
-		font-family: "Press Start 2P", sans-serif;
+		font-family: 'Press Start 2P', sans-serif;
 	}
 </style>
 
@@ -43,22 +43,22 @@
 <Toasts />
 
 <script lang="ts">
-	import { Header, Toasts, Icon, Loading } from "sheodox-ui";
-	import { eventStatus } from "./stores/schedule";
-	import Schedule from "./Schedule.svelte";
+	import { Header, Toasts, Icon, Loading } from 'sheodox-ui';
+	import { eventStatus } from './stores/schedule';
+	import Schedule from './Schedule.svelte';
 
 	const links = [
 		{
-			text: "Twitch",
-			icon: "twitch",
-			iconVariant: "brand",
-			href: "https://www.twitch.tv/gamesdonequick",
+			text: 'Twitch',
+			icon: 'twitch',
+			iconVariant: 'brand',
+			href: 'https://www.twitch.tv/gamesdonequick',
 		},
 		{
-			text: "GDQ",
-			icon: "arrow-up-right-from-square",
-			iconVariant: "solid",
-			href: "https://gamesdonequick.com/",
+			text: 'GDQ',
+			icon: 'arrow-up-right-from-square',
+			iconVariant: 'solid',
+			href: 'https://gamesdonequick.com/',
 		},
 	] as const;
 </script>

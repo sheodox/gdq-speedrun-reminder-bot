@@ -16,29 +16,30 @@ export interface Speedrun {
 	host: string;
 }
 const REFRESH_INTERVAL_MS = minutesToMilliseconds(5),
-	SAVE_PATH = "./data/schedule.json",
+	SAVE_PATH = './data/schedule.json',
 	NEW_RUN_TIME_FORMAT = new Intl.DateTimeFormat('en', {
 		dateStyle: 'medium',
-		timeStyle: 'short'
+		timeStyle: 'short',
 	}),
 	WEEKDAY_FORMAT = new Intl.DateTimeFormat('en', {
 		weekday: 'short',
 	}),
 	formatRunWithTime = (run: Speedrun) => {
-		return `> **${run.gameName} - ${run.details}** at ${WEEKDAY_FORMAT.format(run.startTime)}, ${NEW_RUN_TIME_FORMAT.format(run.startTime)}`
+		return `> **${run.gameName} - ${run.details}** at ${WEEKDAY_FORMAT.format(
+			run.startTime
+		)}, ${NEW_RUN_TIME_FORMAT.format(run.startTime)}`;
 	};
 
-await fs.mkdir(path.dirname(SAVE_PATH), { recursive: true })
-
+await fs.mkdir(path.dirname(SAVE_PATH), { recursive: true });
 
 class Schedule {
-	private schedule: Speedrun[]
+	private schedule: Speedrun[];
 	private savePromise = Promise.resolve();
-	public ready: Promise<void>
+	public ready: Promise<void>;
 
 	constructor() {
-		this.ready = this.load().then(() => this.refresh())
-		setInterval(() => this.refresh(), REFRESH_INTERVAL_MS)
+		this.ready = this.load().then(() => this.refresh());
+		setInterval(() => this.refresh(), REFRESH_INTERVAL_MS);
 	}
 
 	async load() {
@@ -48,31 +49,36 @@ class Schedule {
 			this.schedule = schedule.map((run: Speedrun) => {
 				return {
 					...run,
-					startTime: new Date(run.startTime)
-				}
+					startTime: new Date(run.startTime),
+				};
 			});
-		}
-		catch (e) {
-			console.log("No previous schedule found, starting fresh.")
+		} catch (e) {
+			console.log('No previous schedule found, starting fresh.');
 		}
 	}
 	save() {
 		this.savePromise = this.savePromise.then(async () => {
-			await fs.writeFile(SAVE_PATH, JSON.stringify({
-				schedule: this.schedule
-			}, null, 2));
-		})
+			await fs.writeFile(
+				SAVE_PATH,
+				JSON.stringify(
+					{
+						schedule: this.schedule,
+					},
+					null,
+					2
+				)
+			);
+		});
 	}
 	async refresh() {
 		const oldSchedule = this.schedule;
 
 		this.schedule = [];
-		const scheduleHTML = await fetch('https://gamesdonequick.com/schedule')
-			.then(res => res.text()),
+		const scheduleHTML = await fetch('https://gamesdonequick.com/schedule').then((res) => res.text()),
 			$ = load(scheduleHTML),
 			$startTimes = $('td.start-time'),
-			$runs = $startTimes.map(function() {
-				return $(this.parentNode)
+			$runs = $startTimes.map(function () {
+				return $(this.parentNode);
 			});
 
 		for (const $run of $runs) {
@@ -81,36 +87,37 @@ class Schedule {
 		this.save();
 
 		if (oldSchedule) {
-			const newRuns = this.schedule.filter(run => {
-				return !oldSchedule.some(oldRun => oldRun.id === run.id);
-			}),
-				removedRuns = oldSchedule.filter(run => {
-					return this.schedule.every(oldRun => oldRun.id !== run.id);
+			const newRuns = this.schedule.filter((run) => {
+					return !oldSchedule.some((oldRun) => oldRun.id === run.id);
+				}),
+				removedRuns = oldSchedule.filter((run) => {
+					return this.schedule.every((oldRun) => oldRun.id !== run.id);
 				});
 
-
 			if (newRuns.length) {
-				const games = newRuns.map(formatRunWithTime).join('\n')
+				const games = newRuns.map(formatRunWithTime).join('\n');
 
-				sendDiscordMessage(`New run${newRuns.length === 1 ? '' : 's'} added to the schedule!\n${games}`)
+				sendDiscordMessage(`New run${newRuns.length === 1 ? '' : 's'} added to the schedule!\n${games}`);
 			}
 			if (removedRuns.length) {
 				const plural = removedRuns.length !== 1;
 
-				const games = removedRuns.map(formatRunWithTime).join('\n')
+				const games = removedRuns.map(formatRunWithTime).join('\n');
 
-				sendDiscordMessage(`Notice: ${plural ? `${removedRuns.length} runs were` : 'A run was'} removed from the schedule!\n${games}`)
+				sendDiscordMessage(
+					`Notice: ${plural ? `${removedRuns.length} runs were` : 'A run was'} removed from the schedule!\n${games}`
+				);
 			}
 		}
 	}
 
 	getSchedule(): Speedrun[] {
-		return this.schedule.map(run => ({ ...run }));
+		return this.schedule.map((run) => ({ ...run }));
 	}
 
 	parseRun($run: Cheerio<any>, $: CheerioAPI): Speedrun {
 		function getElementText() {
-			return $(this).text().trim()
+			return $(this).text().trim();
 		}
 
 		const $secondLine = $run.next('tr.second-row'),
@@ -130,7 +137,7 @@ class Schedule {
 			runner,
 			estimate,
 			host,
-		}
+		};
 	}
 }
 

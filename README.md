@@ -13,4 +13,3 @@ This is a simple self-hosted site which lets you choose GDQ runs you're interest
 1. `npm start`
 
 Your server should be running at `http://localhost:5008`
-

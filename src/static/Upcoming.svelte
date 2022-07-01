@@ -24,7 +24,7 @@
 		font-family: monospace;
 	}
 	.over-message {
-		font-family: "Press Start 2P", sans-serif;
+		font-family: 'Press Start 2P', sans-serif;
 	}
 	@media (min-width: 800px) {
 		.upcoming-container {
@@ -71,10 +71,10 @@
 </div>
 
 <script lang="ts">
-	import { eventStatus, now, ongoingRun, nextRun, nextInterestedRun, schedule, Speedrun } from "./stores/schedule";
-	import Platform from "./Platform.svelte";
-	import { formatDistance } from "date-fns";
-	import Estimate from "./Estimate.svelte";
+	import { eventStatus, now, ongoingRun, nextRun, nextInterestedRun, schedule, Speedrun } from './stores/schedule';
+	import Platform from './Platform.svelte';
+	import { formatDistance } from 'date-fns';
+	import Estimate from './Estimate.svelte';
 
 	type Upcoming = {
 		run: Speedrun;
@@ -85,17 +85,17 @@
 	let upcoming: Upcoming[];
 	$: upcoming = [
 		{
-			title: "Ongoing",
+			title: 'Ongoing',
 			run: $ongoingRun,
 			showCountdown: false,
 		},
 		{
-			title: "Up Next",
+			title: 'Up Next',
 			run: $nextRun,
 			showCountdown: true,
 		},
 		{
-			title: "Next Interested Run",
+			title: 'Next Interested Run',
 			run: $nextInterestedRun,
 			showCountdown: true,
 		},
@@ -104,18 +104,18 @@
 	async function scrollToRun(run: Speedrun) {
 		const index = $schedule.indexOf(run);
 
-		const runRow = document.getElementById("run-" + index);
+		const runRow = document.getElementById('run-' + index);
 
 		if (runRow) {
 			runRow.scrollIntoView({
-				block: "center",
-				behavior: "smooth",
-				inline: "start",
+				block: 'center',
+				behavior: 'smooth',
+				inline: 'start',
 			});
 
-			runRow.classList.add("highlight");
+			runRow.classList.add('highlight');
 			await new Promise((resolve) => setTimeout(resolve, 1500));
-			runRow.classList.remove("highlight");
+			runRow.classList.remove('highlight');
 		}
 	}
 </script>

@@ -1,4 +1,12 @@
-import { differenceInDays, endOfDay, intervalToDuration, isAfter, isBefore, isWithinInterval, minutesToMilliseconds } from 'date-fns';
+import {
+	differenceInDays,
+	endOfDay,
+	intervalToDuration,
+	isAfter,
+	isBefore,
+	isWithinInterval,
+	minutesToMilliseconds,
+} from 'date-fns';
 import { createAutoExpireToast } from 'sheodox-ui';
 import { writable, derived } from 'svelte/store';
 import { apiPath } from './common';
@@ -34,15 +42,15 @@ export const eventStatus = derived([now, schedule], ([now, schedule]): EventStat
 			initialized: false,
 			isBefore: false,
 			isAfter: false,
-			countdown: ''
-		}
+			countdown: '',
+		};
 	}
 	const firstRun = schedule[0],
 		lastRun = schedule.at(-1),
 		before = isBefore(now, firstRun.startTime),
 		interval = {
 			start: firstRun.startTime,
-			end: now
+			end: now,
 		},
 		duration = intervalToDuration(interval),
 		days = differenceInDays(interval.start, interval.end);
@@ -51,9 +59,11 @@ export const eventStatus = derived([now, schedule], ([now, schedule]): EventStat
 		initialized: true,
 		isBefore: before,
 		isAfter: isAfter(now, endOfDay(lastRun.startTime)),
-		countdown: `${days > 0 ? days + ":" : ''}${padTwo(duration.hours)}:${padTwo(duration.minutes)}:${padTwo(duration.seconds)}`
-	}
-})
+		countdown: `${days > 0 ? days + ':' : ''}${padTwo(duration.hours)}:${padTwo(duration.minutes)}:${padTwo(
+			duration.seconds
+		)}`,
+	};
+});
 
 //test on fast forward!
 //let num = 0;
@@ -63,14 +73,14 @@ export const eventStatus = derived([now, schedule], ([now, schedule]): EventStat
 
 setInterval(() => {
 	now.set(new Date());
-}, NOW_UPDATE_MS)
+}, NOW_UPDATE_MS);
 
 const startTimeFormat = new Intl.DateTimeFormat('en', {
-	timeStyle: "short"
-})
+	timeStyle: 'short',
+});
 export const formatRunStartTime = (run: Speedrun) => {
 	return startTimeFormat.format(run.startTime);
-}
+};
 
 export const ongoingRunIndex = derived([schedule, now, eventStatus], ([schedule, now, eventStatus]) => {
 	if (eventStatus.isBefore) {
@@ -89,71 +99,82 @@ export const ongoingRunIndex = derived([schedule, now, eventStatus], ([schedule,
 			end: nextRun.startTime,
 		});
 	});
-})
+});
 
-export const ongoingRun = derived([schedule, ongoingRunIndex, eventStatus], ([schedule, ongoingRunIndex, eventStatus]) => {
-	if (eventStatus.isAfter) {
-		return;
+export const ongoingRun = derived(
+	[schedule, ongoingRunIndex, eventStatus],
+	([schedule, ongoingRunIndex, eventStatus]) => {
+		if (eventStatus.isAfter) {
+			return;
+		}
+		return schedule[ongoingRunIndex];
 	}
-	return schedule[ongoingRunIndex];
-})
+);
 export const nextRun = derived([schedule, ongoingRunIndex, eventStatus], ([schedule, ongoingRunIndex, eventStatus]) => {
 	if (eventStatus.isAfter) {
 		return;
 	}
-	return schedule[ongoingRunIndex + 1]
-})
-export const nextInterestedRun = derived([schedule, ongoingRunIndex, interests, eventStatus], ([schedule, ongoingRunIndex, interests, eventStatus]) => {
-	if (eventStatus.isAfter) {
-		return;
-	}
-	for (let i = ongoingRunIndex + 1; i < schedule.length; i++) {
-		if (interests.includes(schedule[i].id)) {
-			return schedule[i]
+	return schedule[ongoingRunIndex + 1];
+});
+export const nextInterestedRun = derived(
+	[schedule, ongoingRunIndex, interests, eventStatus],
+	([schedule, ongoingRunIndex, interests, eventStatus]) => {
+		if (eventStatus.isAfter) {
+			return;
+		}
+		for (let i = ongoingRunIndex + 1; i < schedule.length; i++) {
+			if (interests.includes(schedule[i].id)) {
+				return schedule[i];
+			}
 		}
 	}
-})
+);
 
 export const setInterest = async (id: string, interested: boolean) => {
 	const res = await fetch(apiPath('interest/' + encodeURIComponent(id)), {
-		method: "POST",
+		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
-			interested
-		})
+			interested,
+		}),
 	});
 
 	if (res.ok) {
-		interests.update(int => {
+		interests.update((int) => {
 			if (interested) {
 				return [...int, id];
 			}
-			return int.filter(i => i !== id);
-		})
+			return int.filter((i) => i !== id);
+		});
 	} else {
 		createAutoExpireToast({
 			variant: 'error',
 			message: 'Error',
 			title: 'Error',
-			technicalDetails: `${res.status} - ${res.text()}`
-		})
+			technicalDetails: `${res.status} - ${res.text()}`,
+		});
 	}
-}
+};
 
 async function init() {
-	const { speedruns: runs, interests: intrsts } = await fetch(apiPath('data')).then(res => res.json()) as { speedruns: Speedrun[], interests: string[] }
+	const { speedruns: runs, interests: intrsts } = (await fetch(apiPath('data')).then((res) => res.json())) as {
+		speedruns: Speedrun[];
+		interests: string[];
+	};
 
-	schedule.set(runs.map(run => {
-		return {
-			...run,
-			startTime: new Date(run.startTime)
-		}
-	}))
+	schedule.set(
+		runs.map((run) => {
+			return {
+				...run,
+				startTime: new Date(run.startTime),
+			};
+		})
+	);
 
-	interests.set(intrsts)
+	interests.set(intrsts);
 }
-init()
+init();
 
 setInterval(init, SCHEDULE_POLL_MS);

@@ -6,31 +6,30 @@
 	export let platform: string;
 
 	const platformColors = new Map([
-		["pc", "mint"],
-		["pc - vr", "mint"],
-		["dos", "orange"],
-		["gcn", "purple"],
-		["gba", "yellow"],
-		["gbc", "yellow"],
-		["3ds", "yellow"],
-		["snes", "purple"],
-		["n64", "purple"],
-		["nes", "purple"],
-		["switch", "red"],
-		["saturn", "purple"],
-		["genesis", "purple"],
+		['pc', 'mint'],
+		['pc - vr', 'mint'],
+		['dos', 'orange'],
+		['gcn', 'purple'],
+		['gba', 'yellow'],
+		['gbc', 'yellow'],
+		['3ds', 'yellow'],
+		['snes', 'purple'],
+		['n64', 'purple'],
+		['nes', 'purple'],
+		['switch', 'red'],
+		['saturn', 'purple'],
+		['genesis', 'purple'],
 	]);
 
 	function platformColor(platform: string) {
 		platform = platform.toLowerCase();
 		if (/^ps\d?$/.test(platform)) {
-			return "blue";
+			return 'blue';
 		} else if (/xbox/.test(platform)) {
-			return "green";
+			return 'green';
 		} else if (/wii/.test(platform)) {
-			return "purple";
+			return 'purple';
 		}
-		return platformColors.has(platform) ? platformColors.get(platform) : "red";
+		return platformColors.has(platform) ? platformColors.get(platform) : 'red';
 	}
-
 </script>
