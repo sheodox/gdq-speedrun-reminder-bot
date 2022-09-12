@@ -7,8 +7,9 @@ import { schedule } from './schedule.js';
 import { interests } from './interests.js';
 import { config } from './config.js';
 import { sendDiscordMessage } from './notify.js';
+import { httpLogger } from './logger.js';
 
-const fastify = Fastify({ logger: true }),
+const fastify = Fastify({ logger: httpLogger }),
 	port = process.env.APP_PORT ? parseInt(process.env.APP_PORT, 10) : 5008;
 
 fastify.register(cors, {
@@ -19,6 +20,8 @@ fastify.get('/api/data', async () => {
 	return {
 		speedruns: schedule.getSchedule(),
 		interests: interests.getInterests(),
+		eventName: schedule.eventName,
+		isScheduled: schedule.isEventScheduled(),
 	};
 });
 

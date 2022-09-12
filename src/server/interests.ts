@@ -3,6 +3,7 @@ import path from 'path';
 import { schedule, Speedrun } from './schedule.js';
 import { addMinutes, endOfDay, isToday, isWithinInterval, minutesToMilliseconds, startOfDay } from 'date-fns';
 import { sendDiscordMessage } from './notify.js';
+import { interestLogger } from './logger.js';
 
 const SAVE_PATH = './data/interests.json',
 	UPCOMING_CHECK_INTERVAL_MS = minutesToMilliseconds(1),
@@ -45,17 +46,6 @@ class Interests {
 		this.save();
 	}
 
-	isEventOngoing() {
-		const runs = schedule.getSchedule(),
-			firstRun = runs[0],
-			lastRun = runs.at(-1);
-
-		return isWithinInterval(new Date(), {
-			start: startOfDay(firstRun.startTime),
-			end: endOfDay(lastRun.startTime),
-		});
-	}
-
 	getInterests() {
 		return Array.from(this.interestedSpeedruns);
 	}
@@ -74,7 +64,7 @@ class Interests {
 	}
 
 	async checkUpcoming() {
-		if (!this.isEventOngoing()) {
+		if (!schedule.isEventOngoing()) {
 			return;
 		}
 
@@ -147,7 +137,7 @@ class Interests {
 			this.notifiedSpeedruns = new Set(notifiedSpeedruns);
 			this.lastNotifiedDay = lastNotifiedDay;
 		} catch (e) {
-			console.log('No previous interested speedruns found, starting fresh.');
+			interestLogger.info('No previous interested speedruns found, starting fresh.');
 		}
 	}
 	save() {

@@ -23,7 +23,6 @@ export interface Speedrun {
 }
 
 export interface EventStatus {
-	initialized: boolean;
 	isBefore: boolean;
 	isAfter: boolean;
 	countdown: string;
@@ -34,12 +33,13 @@ const NOW_UPDATE_MS = 1000,
 
 export const now = writable<Date>(new Date());
 export const schedule = writable<Speedrun[]>([]);
+export const isEventScheduled = writable<boolean>(false);
 export const interests = writable<string[]>([]);
+export const scheduleInitialized = writable(false);
 const padTwo = (num: number) => ('' + num).padStart(2, '0');
 export const eventStatus = derived([now, schedule], ([now, schedule]): EventStatus => {
 	if (!schedule.length) {
 		return {
-			initialized: false,
 			isBefore: false,
 			isAfter: false,
 			countdown: '',
@@ -56,7 +56,6 @@ export const eventStatus = derived([now, schedule], ([now, schedule]): EventStat
 		days = differenceInDays(interval.start, interval.end);
 
 	return {
-		initialized: true,
 		isBefore: before,
 		isAfter: isAfter(now, endOfDay(lastRun.startTime)),
 		countdown: `${days > 0 ? days + ':' : ''}${padTwo(duration.hours)}:${padTwo(duration.minutes)}:${padTwo(
@@ -159,9 +158,14 @@ export const setInterest = async (id: string, interested: boolean) => {
 };
 
 async function init() {
-	const { speedruns: runs, interests: intrsts } = (await fetch(apiPath('data')).then((res) => res.json())) as {
+	const {
+		speedruns: runs,
+		interests: intrsts,
+		isScheduled: scheduled,
+	} = (await fetch(apiPath('data')).then((res) => res.json())) as {
 		speedruns: Speedrun[];
 		interests: string[];
+		isScheduled: boolean;
 	};
 
 	schedule.set(
@@ -174,6 +178,8 @@ async function init() {
 	);
 
 	interests.set(intrsts);
+	isEventScheduled.set(scheduled);
+	scheduleInitialized.set(true);
 }
 init();
 

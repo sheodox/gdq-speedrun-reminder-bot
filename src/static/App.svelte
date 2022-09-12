@@ -21,7 +21,7 @@
 		<ul>
 			{#each links as link}
 				<li>
-					<a href={link.href} target="_blank" rel="noreferrer noopener">
+					<a href={link.href} target="_blank" rel={linkRel}>
 						<Icon icon={link.icon} iconVariant={link.iconVariant} />
 						{link.text}
 					</a>
@@ -31,9 +31,19 @@
 	</nav>
 </Header>
 <main class="f-column f-1">
-	{#if !$eventStatus.initialized}
-		<div class="f-column justify-content-center align-items-enter f-1">
+	{#if !$scheduleInitialized}
+		<div class="f-column justify-content-center align-items-center f-1">
 			<Loading />
+		</div>
+	{:else if !$isEventScheduled}
+		<div class="f-column justify-content-center align-items-center f-1">
+			<p class="sx-font-size-12 m-0 p-2">
+				<Icon icon="calendar-times" variant="icon-only" />
+			</p>
+			<p class="sx-font-size-6 m-0">No event is currently scheduled. Check back later!</p>
+			<p class="sx-font-size-6">
+				Check <a class="inline-link" href="https://gamesdonequick.com/" rel={linkRel}>Games Done Quick</a> for event news.
+			</p>
 		</div>
 	{:else}
 		<Schedule />
@@ -44,8 +54,10 @@
 
 <script lang="ts">
 	import { Header, Toasts, Icon, Loading } from 'sheodox-ui';
-	import { eventStatus } from './stores/schedule';
+	import { eventStatus, isEventScheduled, scheduleInitialized } from './stores/schedule';
 	import Schedule from './Schedule.svelte';
+
+	const linkRel = 'noreferrer noopener';
 
 	const links = [
 		{

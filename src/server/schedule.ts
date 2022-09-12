@@ -1,9 +1,17 @@
 import path from 'path';
 import fs from 'fs/promises';
 import { Cheerio, CheerioAPI, load } from 'cheerio';
-import { minutesToMilliseconds } from 'date-fns';
+import {
+	addDays,
+	differenceInMilliseconds,
+	endOfDay,
+	isWithinInterval,
+	minutesToMilliseconds,
+	startOfDay,
+} from 'date-fns';
 import fetch from 'node-fetch';
 import { sendDiscordMessage } from './notify.js';
+import { scheduleLogger } from './logger.js';
 
 export interface Speedrun {
 	id: string;
@@ -15,7 +23,7 @@ export interface Speedrun {
 	estimate: string;
 	host: string;
 }
-const REFRESH_INTERVAL_MS = minutesToMilliseconds(5),
+const REFRESH_INTERVAL_ACTIVE_MS = minutesToMilliseconds(5),
 	SAVE_PATH = './data/schedule.json',
 	NEW_RUN_TIME_FORMAT = new Intl.DateTimeFormat('en', {
 		dateStyle: 'medium',
@@ -34,26 +42,60 @@ await fs.mkdir(path.dirname(SAVE_PATH), { recursive: true });
 
 class Schedule {
 	private schedule: Speedrun[];
+	public eventName: string;
 	private savePromise = Promise.resolve();
 	public ready: Promise<void>;
 
 	constructor() {
 		this.ready = this.load().then(() => this.refresh());
-		setInterval(() => this.refresh(), REFRESH_INTERVAL_MS);
+	}
+
+	getMSToNextRefresh() {
+		// during the event, check often
+		if (this.isEventOngoing()) {
+			return REFRESH_INTERVAL_ACTIVE_MS;
+		}
+
+		// while the event is far away, refresh daily in the early morning, so more active refreshing can take over if the event starts
+		const nextRefreshDate = startOfDay(addDays(new Date(), 1));
+		nextRefreshDate.setHours(2);
+		return differenceInMilliseconds(nextRefreshDate, new Date());
+	}
+
+	isEventOngoing() {
+		const runs = this.getSchedule();
+		if (!runs.length) {
+			return false;
+		}
+
+		const firstRun = runs[0],
+			lastRun = runs.at(-1);
+
+		return isWithinInterval(new Date(), {
+			start: startOfDay(firstRun.startTime),
+			end: endOfDay(lastRun.startTime),
+		});
+	}
+
+	isEventScheduled() {
+		return !!this.eventName;
 	}
 
 	async load() {
 		try {
 			const saved = JSON.parse((await fs.readFile(SAVE_PATH)).toString()),
-				{ schedule } = saved;
+				{ schedule, eventName } = saved;
 			this.schedule = schedule.map((run: Speedrun) => {
 				return {
 					...run,
 					startTime: new Date(run.startTime),
 				};
 			});
+			this.eventName = eventName;
 		} catch (e) {
-			console.log('No previous schedule found, starting fresh.');
+			this.schedule = [];
+			this.eventName = '';
+			scheduleLogger.info('No previous schedule found, starting fresh.');
 		}
 	}
 	save() {
@@ -63,6 +105,7 @@ class Schedule {
 				JSON.stringify(
 					{
 						schedule: this.schedule,
+						eventName: this.eventName,
 					},
 					null,
 					2
@@ -71,9 +114,12 @@ class Schedule {
 		});
 	}
 	async refresh() {
-		const oldSchedule = this.schedule;
+		setTimeout(() => this.refresh(), this.getMSToNextRefresh());
+		scheduleLogger.debug('Refreshing schedule');
 
+		const oldSchedule = this.schedule;
 		this.schedule = [];
+
 		const scheduleHTML = await fetch('https://gamesdonequick.com/schedule').then((res) => res.text()),
 			$ = load(scheduleHTML),
 			$startTimes = $('td.start-time'),
@@ -81,9 +127,40 @@ class Schedule {
 				return $(this.parentNode);
 			});
 
+		let eventName = $('h1').text();
+
+		// if this isn't the schedule page, stop, nothing useful in this refresh
+		if (!/schedule/i.test(eventName)) {
+			scheduleLogger.debug(
+				`Schedule page title was "${eventName}" but expected something with "Schedule" in it, ignoring this update.`
+			);
+			return;
+		}
+
+		// this h1 text is "<event name> Schedule", trim that out to get just the name
+		eventName = this.eventName.replace(/schedule$/i, '').trim();
+
 		for (const $run of $runs) {
 			this.schedule.push(this.parseRun($run, $));
 		}
+
+		if (!this.schedule.length) {
+			scheduleLogger.debug('No runs found on the schedule, ignoring this update.');
+			return;
+		}
+
+		if (eventName !== this.eventName) {
+			// notify of new event
+			// only show the date portion of the new event
+			const startTime = this.schedule[0].startTime.toLocaleDateString(),
+				endTime = this.schedule.at(-1).startTime.toLocaleDateString();
+
+			sendDiscordMessage(
+				`New event schedule is available! "${eventName}" starts ${startTime} and goes until ${endTime}.`
+			);
+		}
+
+		this.eventName = eventName;
 		this.save();
 
 		if (oldSchedule) {
