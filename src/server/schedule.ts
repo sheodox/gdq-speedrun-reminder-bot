@@ -149,21 +149,26 @@ class Schedule {
 			return;
 		}
 
-		if (eventName !== this.eventName) {
+		const isDifferentEvent = eventName !== this.eventName;
+
+		if (isDifferentEvent) {
 			// notify of new event
 			// only show the date portion of the new event
 			const startTime = this.schedule[0].startTime.toLocaleDateString(),
-				endTime = this.schedule.at(-1).startTime.toLocaleDateString();
+				endTime = this.schedule.at(-1).startTime.toLocaleDateString(),
+				firstFewGames = this.schedule.slice(0, 5).map(formatRunWithTime).join('\n');
 
 			sendDiscordMessage(
-				`New event schedule is available! "${eventName}" starts ${startTime} and goes until ${endTime}.`
+				`New event schedule is available! "${eventName}" starts ${startTime} and goes until ${endTime}, with ${this.schedule.length} events. Starting with...\n${firstFewGames}`
 			);
 		}
 
 		this.eventName = eventName;
 		this.save();
 
-		if (oldSchedule) {
+		// if we got an updated schedule for the current event, notify of differences. for new events everything
+		// is assumed to be new, so diffs would be unwanted noise.
+		if (oldSchedule && !isDifferentEvent) {
 			const newRuns = this.schedule.filter((run) => {
 					return !oldSchedule.some((oldRun) => oldRun.id === run.id);
 				}),
