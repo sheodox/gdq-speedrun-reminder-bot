@@ -33,6 +33,7 @@ const NOW_UPDATE_MS = 1000,
 
 export const now = writable<Date>(new Date());
 export const schedule = writable<Speedrun[]>([]);
+export const eventName = writable('');
 export const isEventScheduled = writable<boolean>(false);
 export const interests = writable<string[]>([]);
 export const scheduleInitialized = writable(false);
@@ -162,10 +163,12 @@ async function init() {
 		speedruns: runs,
 		interests: intrsts,
 		isScheduled: scheduled,
+		eventName: name,
 	} = (await fetch(apiPath('data')).then((res) => res.json())) as {
 		speedruns: Speedrun[];
 		interests: string[];
 		isScheduled: boolean;
+		eventName: string;
 	};
 
 	schedule.set(
@@ -178,6 +181,7 @@ async function init() {
 	);
 
 	interests.set(intrsts);
+	eventName.set(name);
 	isEventScheduled.set(scheduled);
 	scheduleInitialized.set(true);
 }

@@ -36,7 +36,7 @@
 			<Loading />
 		</div>
 	{:else if !$isEventScheduled}
-		<div class="f-column justify-content-center align-items-center f-1">
+		<div class="f-column justify-content-center align-items-center f-1 text-align-center">
 			<p class="sx-font-size-12 m-0 p-2">
 				<Icon icon="calendar-times" variant="icon-only" />
 			</p>

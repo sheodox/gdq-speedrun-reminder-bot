@@ -50,9 +50,17 @@
 		text-align: center;
 	}
 
+	h1 {
+		font-family: 'Press Start 2P', sans-serif;
+		font-size: var(--sx-font-size-5);
+	}
+
 	@media (max-width: 600px) {
 		:is(td, th).desktop {
 			display: none;
+		}
+		h1 {
+			font-size: var(--sx-font-size-3);
 		}
 	}
 	@media (min-width: 601px) {
@@ -61,6 +69,8 @@
 		}
 	}
 </style>
+
+<h1 class="text-align-center">{$eventName}</h1>
 
 <Upcoming />
 
@@ -151,7 +161,16 @@
 <script lang="ts">
 	import { Checkbox, Icon } from 'sheodox-ui';
 	import { isSameDay, isBefore, endOfDay, isAfter } from 'date-fns';
-	import { now, ongoingRun, schedule, interests, setInterest, Speedrun, formatRunStartTime } from './stores/schedule';
+	import {
+		now,
+		eventName,
+		ongoingRun,
+		schedule,
+		interests,
+		setInterest,
+		Speedrun,
+		formatRunStartTime,
+	} from './stores/schedule';
 	import Upcoming from './Upcoming.svelte';
 	import Platform from './Platform.svelte';
 	import Estimate from './Estimate.svelte';
