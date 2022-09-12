@@ -42,7 +42,9 @@
 			</p>
 			<p class="sx-font-size-6 m-0">No event is currently scheduled. Check back later!</p>
 			<p class="sx-font-size-6">
-				Check <a class="inline-link" href="https://gamesdonequick.com/" rel={linkRel}>Games Done Quick</a> for event news.
+				Check <a class="inline-link" href="https://gamesdonequick.com/" rel={linkRel} target="_blank"
+					>Games Done Quick</a
+				> for event news.
 			</p>
 		</div>
 	{:else}
