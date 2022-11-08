@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs/promises';
-import { Cheerio, CheerioAPI, load } from 'cheerio';
+import { load } from 'cheerio';
 import {
 	addDays,
 	differenceInMilliseconds,
@@ -12,6 +12,7 @@ import {
 import fetch from 'node-fetch';
 import { sendDiscordMessage } from './notify.js';
 import { scheduleLogger } from './logger.js';
+import type { Cheerio, CheerioAPI } from 'cheerio';
 
 export interface Speedrun {
 	id: string;
@@ -138,7 +139,7 @@ class Schedule {
 		}
 
 		// this h1 text is "<event name> Schedule", trim that out to get just the name
-		eventName = this.eventName.replace(/schedule$/i, '').trim();
+		eventName = eventName.replace(/schedule$/i, '').trim();
 
 		for (const $run of $runs) {
 			this.schedule.push(this.parseRun($run, $));
@@ -159,7 +160,7 @@ class Schedule {
 				firstFewGames = this.schedule.slice(0, 5).map(formatRunWithTime).join('\n');
 
 			sendDiscordMessage(
-				`New event schedule is available! "${eventName}" starts ${startTime} and goes until ${endTime}, with ${this.schedule.length} events. Starting with...\n${firstFewGames}`
+				`New event schedule is available! "${eventName}" starts ${startTime} and goes until ${endTime}, with ${this.schedule.length} things on the schedule. Starting with...\n${firstFewGames}`
 			);
 		}
 

@@ -1,9 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { schedule, Speedrun } from './schedule.js';
-import { addMinutes, endOfDay, isToday, isWithinInterval, minutesToMilliseconds, startOfDay } from 'date-fns';
+import { schedule } from './schedule.js';
+import { addMinutes, isToday, isWithinInterval, minutesToMilliseconds, startOfDay } from 'date-fns';
 import { sendDiscordMessage } from './notify.js';
 import { interestLogger } from './logger.js';
+import type { Speedrun } from './schedule.js';
 
 const SAVE_PATH = './data/interests.json',
 	UPCOMING_CHECK_INTERVAL_MS = minutesToMilliseconds(1),

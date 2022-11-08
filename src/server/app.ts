@@ -1,5 +1,5 @@
 // Require the framework and instantiate it
-import Fastify, { FastifySchema } from 'fastify';
+import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
@@ -8,6 +8,7 @@ import { interests } from './interests.js';
 import { config } from './config.js';
 import { sendDiscordMessage } from './notify.js';
 import { httpLogger } from './logger.js';
+import type { FastifySchema } from 'fastify';
 
 const fastify = Fastify({ logger: httpLogger }),
 	port = process.env.APP_PORT ? parseInt(process.env.APP_PORT, 10) : 5008;

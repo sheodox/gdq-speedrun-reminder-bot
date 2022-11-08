@@ -130,7 +130,7 @@
 				<td class="desktop">
 					{run.runner}
 					<br />
-					<Icon icon="microphone" />{run.host}
+					<Icon icon="microphone" />{run.host || '???'}
 				</td>
 				<td class="mobile f-column gap-2">
 					<div>
@@ -161,19 +161,11 @@
 <script lang="ts">
 	import { Checkbox, Icon } from 'sheodox-ui';
 	import { isSameDay, isBefore, endOfDay, isAfter } from 'date-fns';
-	import {
-		now,
-		eventName,
-		ongoingRun,
-		schedule,
-		interests,
-		setInterest,
-		Speedrun,
-		formatRunStartTime,
-	} from './stores/schedule';
+	import { now, eventName, ongoingRun, schedule, interests, setInterest, formatRunStartTime } from './stores/schedule';
 	import Upcoming from './Upcoming.svelte';
 	import Platform from './Platform.svelte';
 	import Estimate from './Estimate.svelte';
+	import type { Speedrun } from './stores/schedule';
 
 	const daySplitFormat = new Intl.DateTimeFormat('en', {
 		dateStyle: 'full',

@@ -71,10 +71,11 @@
 </div>
 
 <script lang="ts">
-	import { eventStatus, now, ongoingRun, nextRun, nextInterestedRun, schedule, Speedrun } from './stores/schedule';
+	import { eventStatus, now, ongoingRun, nextRun, nextInterestedRun, schedule } from './stores/schedule';
 	import Platform from './Platform.svelte';
 	import { formatDistance } from 'date-fns';
 	import Estimate from './Estimate.svelte';
+	import type { Speedrun } from './stores/schedule';
 
 	type Upcoming = {
 		run: Speedrun;
