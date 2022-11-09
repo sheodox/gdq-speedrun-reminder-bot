@@ -41,14 +41,30 @@ const REFRESH_INTERVAL_ACTIVE_MS = minutesToMilliseconds(5),
 
 await fs.mkdir(path.dirname(SAVE_PATH), { recursive: true });
 
+type ScheduleEvents = 'newEvent';
+type ScheduleEventHandler = () => any;
+
 class Schedule {
 	private schedule: Speedrun[];
 	public eventName: string;
 	private savePromise = Promise.resolve();
 	public ready: Promise<void>;
+	private eventHandlers = new Map<ScheduleEvents, ScheduleEventHandler[]>();
 
 	constructor() {
 		this.ready = this.load().then(() => this.refresh());
+	}
+
+	on(eventType: ScheduleEvents, handler: ScheduleEventHandler) {
+		const existingEvents = this.eventHandlers.get(eventType) || [];
+		this.eventHandlers.set(eventType, [...existingEvents, handler]);
+	}
+
+	private emit(eventType: ScheduleEvents) {
+		const handlers = this.eventHandlers.get(eventType);
+		for (const handler of handlers) {
+			handler();
+		}
 	}
 
 	getMSToNextRefresh() {
@@ -162,6 +178,8 @@ class Schedule {
 			sendDiscordMessage(
 				`New event schedule is available! "${eventName}" starts ${startTime} and goes until ${endTime}, with ${this.schedule.length} things on the schedule. Starting with...\n${firstFewGames}`
 			);
+
+			this.emit('newEvent');
 		}
 
 		this.eventName = eventName;

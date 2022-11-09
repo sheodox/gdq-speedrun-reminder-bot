@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { schedule } from './schedule.js';
-import { addMinutes, isToday, isWithinInterval, minutesToMilliseconds, startOfDay } from 'date-fns';
+import { addMinutes, isToday, isWithinInterval, minutesToMilliseconds } from 'date-fns';
 import { sendDiscordMessage } from './notify.js';
 import { interestLogger } from './logger.js';
 import type { Speedrun } from './schedule.js';
@@ -35,6 +35,13 @@ class Interests {
 			await this.load();
 			this.checkUpcoming();
 			setInterval(() => this.checkUpcoming(), UPCOMING_CHECK_INTERVAL_MS);
+		});
+
+		schedule.on('newEvent', () => {
+			interestLogger.info('Notified by scheduler of new event, resetting interests.');
+			this.interestedSpeedruns = new Set<string>();
+			this.notifiedSpeedruns = new Set<string>();
+			this.lastNotifiedDay = '';
 		});
 	}
 
