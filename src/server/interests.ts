@@ -31,8 +31,8 @@ class Interests {
 	savePromise = Promise.resolve();
 
 	constructor() {
-		this.load().then(async () => {
-			await schedule.ready;
+		schedule.ready.then(async () => {
+			await this.load();
 			this.checkUpcoming();
 			setInterval(() => this.checkUpcoming(), UPCOMING_CHECK_INTERVAL_MS);
 		});
@@ -132,8 +132,16 @@ class Interests {
 
 	async load() {
 		try {
+			const eventName = schedule.eventName;
+
 			const saved = JSON.parse((await fs.readFile(SAVE_PATH)).toString()),
-				{ interestedSpeedruns, notifiedSpeedruns, lastNotifiedDay } = saved;
+				{ interestedSpeedruns, notifiedSpeedruns, lastNotifiedDay, eventName: oldEventName } = saved;
+
+			if (oldEventName !== eventName) {
+				interestLogger.info('New event since last time, starting fresh.');
+				return;
+			}
+
 			this.interestedSpeedruns = new Set(interestedSpeedruns);
 			this.notifiedSpeedruns = new Set(notifiedSpeedruns);
 			this.lastNotifiedDay = lastNotifiedDay;
@@ -150,6 +158,7 @@ class Interests {
 						interestedSpeedruns: Array.from(this.interestedSpeedruns),
 						notifiedSpeedruns: Array.from(this.notifiedSpeedruns),
 						lastNotifiedDay: this.lastNotifiedDay,
+						eventName: schedule.eventName,
 					},
 					null,
 					2
