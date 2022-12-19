@@ -14,6 +14,9 @@
 	td {
 		border-bottom: 1px solid var(--sx-gray-300);
 	}
+	tr:hover td {
+		background-color: var(--sx-gray-transparent);
+	}
 	.day-split {
 		background: var(--sx-gray-500);
 		position: sticky;
@@ -94,6 +97,7 @@
 			<th class="desktop">Runners & <Icon icon="microphone" /> Host</th>
 			<th class="mobile">Run</th>
 			<th>Time</th>
+			<th>Actions</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -153,13 +157,29 @@
 				<td class="start-time">
 					{formatRunStartTime(run)}
 				</td>
+				<td>
+					<MenuButton>
+						<span slot="trigger"><Icon icon="chevron-down" variant="icon-only" /><span class="sr-only">Menu</span></span
+						>
+						<ul slot="menu">
+							{@const youtubeSearchQuery = run.gameName + ' speedrun'}
+							<a
+								class="button"
+								target="_blank"
+								rel="noreferrer"
+								href="https://www.youtube.com/results?search_query={encodeURIComponent(youtubeSearchQuery)}"
+								><Icon icon="external-link-alt" />Youtube "{youtubeSearchQuery}"</a
+							>
+						</ul>
+					</MenuButton>
+				</td>
 			</tr>
 		{/each}
 	</tbody>
 </table>
 
 <script lang="ts">
-	import { Checkbox, Icon } from 'sheodox-ui';
+	import { Checkbox, Icon, MenuButton } from 'sheodox-ui';
 	import { isSameDay, isBefore, endOfDay, isAfter } from 'date-fns';
 	import { now, eventName, ongoingRun, schedule, interests, setInterest, formatRunStartTime } from './stores/schedule';
 	import Upcoming from './Upcoming.svelte';
