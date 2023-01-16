@@ -1,5 +1,4 @@
 import App from './App.svelte';
-import { styles } from 'sheodox-ui';
 import './styles.scss';
 import '../../node_modules/@fortawesome/fontawesome-free/css/all.min.css';
 
