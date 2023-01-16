@@ -163,13 +163,24 @@
 						>
 						<ul slot="menu">
 							{@const youtubeSearchQuery = run.gameName + ' speedrun'}
-							<a
-								class="button"
-								target="_blank"
-								rel="noreferrer"
-								href="https://www.youtube.com/results?search_query={encodeURIComponent(youtubeSearchQuery)}"
-								><Icon icon="external-link-alt" />Youtube "{youtubeSearchQuery}"</a
-							>
+							<li>
+								<a
+									class="button"
+									target="_blank"
+									rel="noreferrer"
+									href="https://www.youtube.com/results?search_query={encodeURIComponent(youtubeSearchQuery)}"
+									><Icon icon="external-link-alt" />Youtube "{youtubeSearchQuery}"</a
+								>
+							</li>
+							<li>
+								<a
+									class="button"
+									target="_blank"
+									rel="noreferrer"
+									href="https://www.youtube.com/@gamesdonequick/search?query={encodeURIComponent(run.gameName)}"
+									><Icon icon="external-link-alt" />Search GDQ channel</a
+								>
+							</li>
 						</ul>
 					</MenuButton>
 				</td>
